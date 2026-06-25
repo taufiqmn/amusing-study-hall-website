@@ -18,6 +18,7 @@ export const metadata: Metadata = {
   description: "Learn C programming, Java, Matrix, and HSC subjects for free with easy Bangla explanations, video lessons, quizzes, and progress tracking.",
   other: {
     'color-scheme': 'light dark',
+    'google-site-verification': 'B4bC_JZscs8fg13i3jvF4sK8T3SDfB4k-qRHUg76Tkc',
   },
 };
 export default function RootLayout({
