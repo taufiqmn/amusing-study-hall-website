@@ -11,7 +11,7 @@ export default function CoursePage() {
 
   const [course, setCourse] = useState<any>(null)
   const [lessons, setLessons] = useState<any[]>([])
-  const [completedCount, setCompletedCount] = useState(0)
+ const [completedLessonIds, setCompletedLessonIds] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -26,15 +26,15 @@ export default function CoursePage() {
         .order('order_index', { ascending: true })
       setLessons(lessonData || [])
 
-      const { data: { user } } = await supabase.auth.getUser()
+ const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         const { data: progressData } = await supabase
           .from('progress')
-          .select('*')
+          .select('lesson_id')
           .eq('user_id', user.id)
           .eq('course_id', courseId)
           .eq('status', 'completed')
-        setCompletedCount(progressData?.length || 0)
+        setCompletedLessonIds((progressData || []).map((p) => p.lesson_id))
       }
 
       setLoading(false)
@@ -45,8 +45,8 @@ export default function CoursePage() {
   if (loading) return <p style={{ padding: 20 }}>Loading...</p>
 
   const totalLessons = lessons.length
-  const progressPct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0
-
+  const completedCount = completedLessonIds.length
+  const progressPct = totalLessons > 0 ? Math.round((completedLessonIds.length / totalLessons) * 100) : 0
   return (
     <div style={{ position: 'relative', minHeight: '100vh', background: 'var(--background)', overflow: 'hidden' }}>
       <div
@@ -90,7 +90,7 @@ export default function CoursePage() {
               />
             </div>
             <p style={{ fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', margin: 0 }}>
-              {completedCount}/{totalLessons} lessons
+              {completedLessonIds.length}/{totalLessons} lessons
             </p>
           </div>
         </div>
@@ -116,7 +116,7 @@ export default function CoursePage() {
             }}
           />
           <div style={{ position: 'relative' }}>
-            <CourseRoadmap lessons={lessons} completedCount={completedCount} />
+         <CourseRoadmap lessons={lessons} completedLessonIds={completedLessonIds} />
           </div>
         </div>
       </div>
