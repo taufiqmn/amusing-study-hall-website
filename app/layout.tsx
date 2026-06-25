@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Amusing Study Hall",
-  description: "Learn skills and academics, the amusing way.",
+  title: "Amusing Study Hall — Free C, Java, Matrix & HSC Courses in Bangla",
+  description: "Learn C programming, Java, Matrix, and HSC subjects for free with easy Bangla explanations, video lessons, quizzes, and progress tracking.",
   other: {
     'color-scheme': 'light dark',
   },

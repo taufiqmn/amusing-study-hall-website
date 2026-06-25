@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import SiteHeader from '@/components/SiteHeader'
+import MatrixNotationContent from '@/components/lessons/MatrixNotationContent'
 
 function getYouTubeEmbedUrl(url: string) {
   const match = url.match(/(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/)
@@ -159,9 +160,13 @@ export default function LessonPage() {
           )}
 
           <div style={{ marginBottom: 24 }}>
-            <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Explanation</h2>
-            <p style={{ fontSize: 14, lineHeight: 1.7, opacity: 0.85 }}>{lesson.explanation || 'Explanation coming soon.'}</p>
-          </div>
+  <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Explanation</h2>
+  {lesson.title === 'Matrix Notation, Elements, Size' ? (
+    <MatrixNotationContent />
+  ) : (
+    <p style={{ fontSize: 14, lineHeight: 1.7, opacity: 0.85 }}>{lesson.explanation || 'Explanation coming soon.'}</p>
+  )}
+</div>
 
           {lesson.examples && (
             <div style={{ marginBottom: 24 }}>
