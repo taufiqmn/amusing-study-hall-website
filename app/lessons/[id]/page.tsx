@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import SiteHeader from '@/components/SiteHeader'
 import MatrixNotationContent from '@/components/lessons/MatrixNotationContent'
+import Quiz from '@/components/Quiz'
 
 function getYouTubeEmbedUrl(url: string) {
   const match = url.match(/(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/)
@@ -185,7 +186,10 @@ export default function LessonPage() {
               </div>
             </div>
           )}
-
+<div style={{ marginBottom: 24 }}>
+            <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Quiz</h2>
+            <Quiz lessonId={lesson.id} />
+          </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
             <button
               onClick={goToPrev}
