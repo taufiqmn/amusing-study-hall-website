@@ -10,53 +10,51 @@ type Lesson = {
 }
 
 function BulbNode({ status, size = 70 }: { status: 'locked' | 'unlocked' | 'completed'; size?: number }) {
-  const isLocked = status === 'locked'
-  const isCompleted = status === 'completed'
-  const bulbColor = isLocked ? '#5a6a7a' : '#F3CB4B'
-  const glowOpacity = isLocked ? 0 : 0.45
-
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100">
-      <g transform="rotate(30 50 50)">
-        {!isLocked && (
-          <ellipse cx="50" cy="40" rx="34" ry="34" fill={bulbColor} opacity={glowOpacity}>
-            <animate attributeName="opacity" values={`${glowOpacity * 0.7};${glowOpacity};${glowOpacity * 0.7}`} dur="2s" repeatCount="indefinite" />
-          </ellipse>
-        )}
-        {!isLocked && (
-          <>
-            <circle cx="50" cy="38" r="30" fill="none" stroke="#F3CB4B" strokeWidth="1.5" opacity="0.5">
-              <animate attributeName="r" values="26;34;26" dur="2.4s" repeatCount="indefinite" />
-              <animate attributeName="opacity" values="0.55;0.1;0.55" dur="2.4s" repeatCount="indefinite" />
-            </circle>
-            <circle cx="50" cy="38" r="22" fill="none" stroke="#4FC3A1" strokeWidth="1.5" opacity="0.6">
-              <animate attributeName="r" values="20;26;20" dur="2.4s" begin="0.4s" repeatCount="indefinite" />
-              <animate attributeName="opacity" values="0.65;0.15;0.65" dur="2.4s" begin="0.4s" repeatCount="indefinite" />
-            </circle>
-          </>
-        )}
-        <path
-          d="M50 14 C 65 14, 75 26, 75 40 C 75 52, 67 58, 62 64 C 60 66.5, 59 69, 59 72 L 41 72 C 41 69, 40 66.5, 38 64 C 33 58, 25 52, 25 40 C 25 26, 35 14, 50 14 Z"
-          fill={bulbColor}
+    <div style={{ position: 'relative', width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {status !== 'locked' && (
+        <div
+          style={{
+            position: 'absolute',
+            width: '130%',
+            height: '130%',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(243,203,75,0.45), transparent 70%)',
+            animation: 'pulseBulbGlow 2s ease-in-out infinite',
+          }}
         />
-        <path d="M38 24 C 34 30, 32 36, 33 42" stroke="white" strokeWidth="3" strokeLinecap="round" fill="none" opacity={isLocked ? 0.15 : 0.35} />
-        <path d="M41 36 q4 -6 8 0" stroke="#1A1A2E" strokeWidth="2" fill="none" opacity={isLocked ? 0.4 : 0.7} strokeLinecap="round" />
-        <path d="M53 36 q4 -6 8 0" stroke="#1A1A2E" strokeWidth="2" fill="none" opacity={isLocked ? 0.4 : 0.7} strokeLinecap="round" />
-        <path d="M43 48 q7 6 14 0" stroke="#1A1A2E" strokeWidth="2" fill="none" opacity={isLocked ? 0.4 : 0.7} strokeLinecap="round" />
-        <rect x="41" y="72" width="18" height="5" fill="#cfcfc8" opacity={isLocked ? 0.5 : 1} />
-        <rect x="42" y="77" width="16" height="4" fill="#b5b5ad" opacity={isLocked ? 0.5 : 1} />
-        <rect x="42.5" y="81" width="15" height="4" fill="#cfcfc8" opacity={isLocked ? 0.5 : 1} />
-        <rect x="43" y="85" width="14" height="5" rx="2" fill="#9a9a92" opacity={isLocked ? 0.5 : 1} />
-        {isCompleted && (
-          <g>
-            <path d="M20 12 L50 0 L80 12 L50 24 Z" fill="#1A1A2E" />
-            <circle cx="50" cy="12" r="3" fill="#F3CB4B" />
-            <line x1="72" y1="14" x2="72" y2="28" stroke="#F3CB4B" strokeWidth="1.8" />
-            <circle cx="72" cy="30" r="3" fill="#F3CB4B" />
-          </g>
-        )}
-      </g>
-    </svg>
+      )}
+
+      <img
+        src="/bulb-color.png"
+        alt={status}
+        style={{
+          width: '78%',
+          height: '78%',
+          position: 'relative',
+          zIndex: 1,
+          transform: 'rotate(30deg)',
+          filter: status === 'locked' ? 'grayscale(1) brightness(0.65)' : 'none',
+          transition: 'filter 0.4s',
+        }}
+      />
+
+      {status === 'completed' && (
+        <svg width={size * 0.55} height={size * 0.4} viewBox="0 0 100 70" style={{ position: 'absolute', top: -6, left: '50%', transform: 'translateX(-50%) rotate(0deg)', zIndex: 2 }}>
+          <path d="M10 26 L50 6 L90 26 L50 46 Z" fill="#1A1A2E" stroke="#F3CB4B" strokeWidth="2" />
+          <circle cx="50" cy="26" r="4" fill="#F3CB4B" />
+          <line x1="78" y1="30" x2="78" y2="48" stroke="#F3CB4B" strokeWidth="2.5" />
+          <circle cx="78" cy="52" r="4" fill="#F3CB4B" />
+        </svg>
+      )}
+
+      <style>{`
+        @keyframes pulseBulbGlow {
+          0%, 100% { opacity: 0.4; transform: scale(0.9); }
+          50% { opacity: 0.8; transform: scale(1.1); }
+        }
+      `}</style>
+    </div>
   )
 }
 

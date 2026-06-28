@@ -6,6 +6,10 @@ import { supabase } from '@/lib/supabase'
 import SiteHeader from '@/components/SiteHeader'
 import MatrixNotationContent from '@/components/lessons/MatrixNotationContent'
 import Quiz from '@/components/Quiz'
+import MatrixAdditionContent from '@/components/lessons/MatrixAdditionContent'
+import TraceContent from '@/components/lessons/TraceContent'
+import TransposeContent from '@/components/lessons/TransposeContent'
+import MatrixTypesContent from '@/components/lessons/MatrixTypesContent'
 
 function getYouTubeEmbedUrl(url: string) {
   const match = url.match(/(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/)
@@ -162,8 +166,16 @@ export default function LessonPage() {
 
           <div style={{ marginBottom: 24 }}>
   <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Explanation</h2>
-  {lesson.title === 'Matrix Notation, Elements, Size' ? (
+{lesson.title === 'Matrix Notation, Elements, Size' ? (
     <MatrixNotationContent />
+  ) : lesson.title === 'Matrix Addition and Subtraction' ? (
+    <MatrixAdditionContent />
+  ) : lesson.title === 'Trace of a Matrix' ? (
+    <TraceContent />
+  ) : lesson.title === 'Transpose of a Matrix' ? (
+    <TransposeContent />
+  ) : lesson.title === 'Different Types of Matrices' ? (
+    <MatrixTypesContent />
   ) : (
     <p style={{ fontSize: 14, lineHeight: 1.7, opacity: 0.85 }}>{lesson.explanation || 'Explanation coming soon.'}</p>
   )}

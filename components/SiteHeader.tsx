@@ -19,19 +19,36 @@ export default function SiteHeader() {
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: '14px 20px',
-        borderBottom: '1px solid var(--card-border)',
         position: 'sticky',
         top: 0,
         background: 'var(--background)',
+        backdropFilter: 'blur(10px)',
         zIndex: 20,
+        borderBottom: '1px solid var(--card-border)',
       }}
     >
-      <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-        <img src="/logo.svg" alt="Amusing Study Hall logo" style={{ width: 28, height: 28 }} />
-        <span style={{ fontWeight: 700, fontSize: 15, color: 'var(--foreground)' }}>Amusing Study Hall</span>
+      <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+        <div
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: '50%',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'var(--accent-gradient)',
+            flexShrink: 0,
+          }}
+        >
+          <img src="/logo.svg" alt="Amusing Study Hall logo" style={{ width: '85%', height: '85%', objectFit: 'cover', borderRadius: '50%' }} />
+        </div>
+        <span style={{ fontWeight: 800, fontSize: 15, color: 'var(--foreground)', letterSpacing: -0.3, whiteSpace: 'nowrap' }}>
+          Amusing Study Hall
+        </span>
       </Link>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <ThemeToggle />
         {user ? (
           <Link href="/dashboard" style={{ textDecoration: 'none' }}>
@@ -40,7 +57,7 @@ export default function SiteHeader() {
                 width: 32,
                 height: 32,
                 borderRadius: '50%',
-                background: 'var(--accent)',
+                background: 'var(--accent-gradient)',
                 color: 'white',
                 display: 'flex',
                 alignItems: 'center',
@@ -53,9 +70,14 @@ export default function SiteHeader() {
             </div>
           </Link>
         ) : (
-          <Link href="/login" style={{ fontSize: 13, color: 'var(--accent)', textDecoration: 'none' }}>
-            Log in
-          </Link>
+          <>
+            <Link href="/login" style={{ fontSize: 12, fontWeight: 600, padding: '8px 14px', borderRadius: 20, background: 'var(--pill-bg)', color: 'var(--accent)', textDecoration: 'none' }}>
+              Log in
+            </Link>
+            <Link href="/signup" style={{ fontSize: 12, fontWeight: 700, padding: '8px 16px', borderRadius: 20, background: 'var(--accent-gradient)', color: 'white', textDecoration: 'none' }}>
+              Sign up
+            </Link>
+          </>
         )}
       </div>
     </div>

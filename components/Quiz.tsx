@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import MatrixDisplay from '@/components/MatrixDisplay'
 
 type Question = {
   id: string
@@ -133,6 +134,9 @@ export default function Quiz({ lessonId }: { lessonId: string }) {
                 border = '#e25c5c'
               }
             }
+  const isMatrixOption = opt.startsWith('MATRIX:')
+            const matrixData = isMatrixOption ? JSON.parse(opt.replace('MATRIX:', '')) : null
+
             return (
               <button
                 key={i}
@@ -141,7 +145,7 @@ export default function Quiz({ lessonId }: { lessonId: string }) {
                 style={{
                   textAlign: 'left',
                   fontSize: 13,
-                  padding: '10px 14px',
+                  padding: isMatrixOption ? '6px 14px' : '10px 14px',
                   borderRadius: 10,
                   border: `1.5px solid ${border}`,
                   background: bg,
@@ -149,7 +153,7 @@ export default function Quiz({ lessonId }: { lessonId: string }) {
                   color: 'var(--foreground)',
                 }}
               >
-                {opt}
+                {isMatrixOption ? <MatrixDisplay data={matrixData} /> : opt}
               </button>
             )
           })}
