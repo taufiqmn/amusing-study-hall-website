@@ -10,6 +10,15 @@ import MatrixAdditionContent from '@/components/lessons/MatrixAdditionContent'
 import TraceContent from '@/components/lessons/TraceContent'
 import TransposeContent from '@/components/lessons/TransposeContent'
 import MatrixTypesContent from '@/components/lessons/MatrixTypesContent'
+import EqualEquivalentContent from '@/components/lessons/EqualEquivalentContent'
+import PracticeSection from '@/components/PracticeSection'
+import SymmetricContent from '@/components/lessons/SymmetricContent'
+import MatrixMultiplicationContent from '@/components/lessons/MatrixMultiplicationContent'
+import { matrixMultiplicationLongQuestions } from '@/components/lessons/MatrixMultiplicationLongQuestions'
+import CInstallContent from '@/components/lessons/CInstallContent'
+import WhatIsDatabaseContent from '@/components/lessons/WhatIsDatabaseContent'
+import WhatIsAlgorithmContent from '@/components/lessons/WhatIsAlgorithmContent'
+import OracleInstallContent from '@/components/lessons/OracleInstallContent'
 
 function getYouTubeEmbedUrl(url: string) {
   const match = url.match(/(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/)
@@ -84,10 +93,9 @@ export default function LessonPage() {
     })
   }
 
-  const markComplete = async () => {
+const markComplete = async () => {
     if (!user) {
-      router.push('/login')
-      return false
+      return true // allow navigation, just skip recording progress
     }
     if (!completed) {
       setMarking(true)
@@ -176,6 +184,20 @@ export default function LessonPage() {
     <TransposeContent />
   ) : lesson.title === 'Different Types of Matrices' ? (
     <MatrixTypesContent />
+  ) : lesson.title === 'Equal and Equivalent Matrices' ? (
+    <EqualEquivalentContent />
+  ) : lesson.title === 'Symmetric Matrix and Skew-Symmetric Matrix' ? (
+    <SymmetricContent />
+  ) : lesson.title === 'Matrix Multiplication' ? (
+    <MatrixMultiplicationContent />
+  ) :  lesson.title === 'Installing Code::Blocks' ? (
+    <CInstallContent />
+  ) : lesson.title === 'What is a Database?' ? (
+    <WhatIsDatabaseContent />
+  ) : lesson.title === 'What is an Algorithm?' ? (
+    <WhatIsAlgorithmContent />
+  ) : lesson.title === 'Installing Oracle Database & SQL Developer' ? (
+    <OracleInstallContent />
   ) : (
     <p style={{ fontSize: 14, lineHeight: 1.7, opacity: 0.85 }}>{lesson.explanation || 'Explanation coming soon.'}</p>
   )}
@@ -199,8 +221,11 @@ export default function LessonPage() {
             </div>
           )}
 <div style={{ marginBottom: 24 }}>
-            <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Quiz</h2>
-            <Quiz lessonId={lesson.id} />
+            <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Practice</h2>
+            <PracticeSection
+              lessonId={lesson.id}
+              longQuestions={lesson.title === 'Matrix Multiplication' ? matrixMultiplicationLongQuestions : undefined}
+            />
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
             <button
@@ -219,7 +244,11 @@ export default function LessonPage() {
             >
               ← Previous lesson
             </button>
-
+{!user && (
+            <p style={{ fontSize: 11, opacity: 0.6, textAlign: 'center', marginBottom: 8 }}>
+              <a href="/signup" style={{ color: 'var(--accent)' }}>Sign up</a> to save your progress and track time spent
+            </p>
+          )}
             <button
               onClick={goToNext}
               disabled={marking}

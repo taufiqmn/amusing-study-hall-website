@@ -9,18 +9,46 @@ type Lesson = {
   order_index: number
 }
 
-function BulbNode({ status, size = 70 }: { status: 'locked' | 'unlocked' | 'completed'; size?: number }) {
+const topicIcons: Record<string, string> = {
+  install: '🔧',
+  syntax: '{ }',
+  execution: '⚙️',
+  'data types': '🔢',
+  variable: '🔢',
+  operator: '➕',
+  conditional: '🔀',
+  loop: '🔁',
+  function: 'ƒ',
+  array: '📊',
+  notation: '🔢',
+  types: '📐',
+  transpose: '🔄',
+  trace: '∑',
+  symmetric: '⚖️',
+  addition: '➕',
+  subtraction: '➖',
+}
+
+function getTopicIcon(title: string): string | null {
+  const lower = title.toLowerCase()
+  for (const key in topicIcons) {
+    if (lower.includes(key)) return topicIcons[key]
+  }
+  return null
+}
+
+function BulbNode({ status, icon }: { status: 'locked' | 'unlocked' | 'completed'; icon: string | null }) {
   return (
-    <div style={{ position: 'relative', width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ position: 'relative', width: 56, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       {status !== 'locked' && (
         <div
           style={{
             position: 'absolute',
-            width: '130%',
-            height: '130%',
+            width: '160%',
+            height: '160%',
             borderRadius: '50%',
             background: 'radial-gradient(circle, rgba(243,203,75,0.45), transparent 70%)',
-            animation: 'pulseBulbGlow 2s ease-in-out infinite',
+            animation: 'pulseGlow 2s ease-in-out infinite',
           }}
         />
       )}
@@ -29,29 +57,55 @@ function BulbNode({ status, size = 70 }: { status: 'locked' | 'unlocked' | 'comp
         src="/bulb-color.png"
         alt={status}
         style={{
-          width: '78%',
-          height: '78%',
+          width: '70%',
+          height: '70%',
           position: 'relative',
           zIndex: 1,
           transform: 'rotate(30deg)',
-          filter: status === 'locked' ? 'grayscale(1) brightness(0.65)' : 'none',
+          filter: status === 'locked' ? 'grayscale(1) brightness(0.6)' : 'none',
           transition: 'filter 0.4s',
         }}
       />
 
+      {status === 'locked' && (
+        <span style={{ position: 'absolute', fontSize: 14, zIndex: 2 }}>🔒</span>
+      )}
+
+      {icon && status !== 'locked' && (
+        <div
+          style={{
+            position: 'absolute',
+            top: -4,
+            right: -4,
+            width: 20,
+            height: 20,
+            borderRadius: '50%',
+            background: 'var(--card-bg)',
+            border: `1.5px solid ${status === 'completed' ? '#F3CB4B' : '#00e5ff'}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 9,
+            fontWeight: 700,
+            color: status === 'completed' ? '#F3CB4B' : '#00e5ff',
+            zIndex: 2,
+          }}
+        >
+          {icon}
+        </div>
+      )}
+
       {status === 'completed' && (
-        <svg width={size * 0.55} height={size * 0.4} viewBox="0 0 100 70" style={{ position: 'absolute', top: -6, left: '50%', transform: 'translateX(-50%) rotate(0deg)', zIndex: 2 }}>
-          <path d="M10 26 L50 6 L90 26 L50 46 Z" fill="#1A1A2E" stroke="#F3CB4B" strokeWidth="2" />
-          <circle cx="50" cy="26" r="4" fill="#F3CB4B" />
-          <line x1="78" y1="30" x2="78" y2="48" stroke="#F3CB4B" strokeWidth="2.5" />
-          <circle cx="78" cy="52" r="4" fill="#F3CB4B" />
+        <svg width={26} height={20} viewBox="0 0 100 70" style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', zIndex: 2 }}>
+          <path d="M10 26 L50 6 L90 26 L50 46 Z" fill="#1A1A2E" stroke="#F3CB4B" strokeWidth="3" />
+          <circle cx="50" cy="26" r="5" fill="#F3CB4B" />
         </svg>
       )}
 
       <style>{`
-        @keyframes pulseBulbGlow {
+        @keyframes pulseGlow {
           0%, 100% { opacity: 0.4; transform: scale(0.9); }
-          50% { opacity: 0.8; transform: scale(1.1); }
+          50% { opacity: 0.85; transform: scale(1.15); }
         }
       `}</style>
     </div>
@@ -68,11 +122,26 @@ export default function CourseRoadmap({
   const router = useRouter()
   const sorted = [...lessons].sort((a, b) => a.order_index - b.order_index)
 
-  const points = sorted.map((lesson, i) => {
-    const zigzagX = i % 2 === 0 ? 120 : 480
-    const y = 70 + i * 110
-    return { ...lesson, x: zigzagX, y }
+  const spacing = 160
+  const startX = 60
+  const midY = 90
+  const ampY = 40
+
+  const points = sorted.map((lesson, i) => ({
+    ...lesson,
+    x: startX + i * spacing,
+    y: midY + (i % 2 === 0 ? -ampY : ampY) - (i % 2 === 0 ? -ampY : ampY) * (i === 0 ? 1 : 0),
+  }))
+
+  // simpler wave: alternate up/down consistently
+  points.forEach((p, i) => {
+    p.y = i % 2 === 0 ? midY - ampY + ampY : midY
   })
+  // Actually compute a clean sine-like wave
+  for (let i = 0; i < points.length; i++) {
+    points[i].y = midY + (i % 2 === 0 ? -ampY : ampY)
+  }
+  points[0].y = midY
 
   const status = (lesson: Lesson, index: number): 'locked' | 'unlocked' | 'completed' => {
     if (completedLessonIds.includes(lesson.id)) return 'completed'
@@ -82,111 +151,132 @@ export default function CourseRoadmap({
     return 'locked'
   }
 
-  const segments = points.slice(1).map((p, i) => {
+  const width = startX * 2 + (points.length - 1) * spacing
+  const height = 220
+
+  const pathD = points
+    .map((p, i) => {
+      if (i === 0) return `M${p.x} ${p.y}`
+      const prev = points[i - 1]
+      const midX = (prev.x + p.x) / 2
+      return `C${midX} ${prev.y}, ${midX} ${p.y}, ${p.x} ${p.y}`
+    })
+    .join(' ')
+
+  const reachedSegments = points.slice(1).map((p, i) => {
     const prev = points[i]
-    const d = `M${prev.x} ${prev.y} C${prev.x} ${prev.y + 55}, ${p.x} ${p.y - 55}, ${p.x} ${p.y}`
+    const midX = (prev.x + p.x) / 2
+    const d = `M${prev.x} ${prev.y} C${midX} ${prev.y}, ${midX} ${p.y}, ${p.x} ${p.y}`
     const reached = status(p, i + 1) !== 'locked'
     return { d, reached, key: p.id }
   })
 
-  const height = 70 + (points.length - 1) * 110 + 80
-
   const handleLockedClick = (e: React.MouseEvent, lessonId: string) => {
     e.preventDefault()
     const proceed = window.confirm(
-      'You haven\'t finished the previous lesson yet. Skipping ahead might make this harder to understand. Continue anyway?'
+      "You haven't finished the previous lesson yet. Skipping ahead might make this harder to understand. Continue anyway?"
     )
-    if (proceed) {
-      router.push(`/lessons/${lessonId}`)
-    }
+    if (proceed) router.push(`/lessons/${lessonId}`)
   }
 
   return (
-    <div style={{ position: 'relative', width: '100%', maxWidth: 600, margin: '0 auto' }}>
-      <svg width="100%" viewBox={`0 0 600 ${height}`} style={{ display: 'block' }}>
-        <defs>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-        {segments.map((seg) => (
-          <path key={`base-${seg.key}`} d={seg.d} stroke="var(--card-border)" strokeWidth="6" fill="none" strokeLinecap="round" />
-        ))}
-        {segments.filter((s) => s.reached).map((seg) => (
-          <path key={`current-${seg.key}`} d={seg.d} stroke="#4FACFE" strokeWidth="5" fill="none" strokeLinecap="round" strokeDasharray="10 8" filter="url(#glow)">
-            <animate attributeName="stroke-dashoffset" values="0;-36" dur="0.7s" repeatCount="indefinite" />
-          </path>
-        ))}
-      </svg>
+    <div style={{ position: 'relative' }}>
+      <p style={{ fontSize: 11, color: 'var(--foreground-muted)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+        👉 Swipe to see all lessons
+      </p>
 
-      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
-        {points.map((p, i) => {
-          const s = status(p, i)
-          const leftPct = (p.x / 600) * 100
-          const topPx = p.y - 35
-          return (
-            <Link
-              key={p.id}
-              href={`/lessons/${p.id}`}
-              onClick={(e) => {
-                if (s === 'locked') handleLockedClick(e, p.id)
-              }}
-              style={{
-                position: 'absolute',
-                left: `${leftPct}%`,
-                top: topPx,
-                transform: 'translateX(-50%)',
-                textAlign: 'center',
-                textDecoration: 'none',
-                cursor: 'pointer',
-                width: 120,
-              }}
-            >
-              <div style={{ position: 'relative', display: 'inline-block' }}>
-                <BulbNode status={s} />
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: -2,
-                    right: -2,
-                    width: 20,
-                    height: 20,
-                    borderRadius: '50%',
-                    background: s === 'locked' ? 'var(--card-border)' : 'var(--accent)',
-                    color: s === 'locked' ? 'var(--foreground)' : 'white',
-                    fontSize: 10,
-                    fontWeight: 800,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: '2px solid var(--card-bg)',
-                  }}
+      <div
+        style={{
+          position: 'relative',
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          borderRadius: 16,
+          background:
+            'radial-gradient(circle at 10px 10px, rgba(255,255,255,0.04) 1.5px, transparent 1.5px) 0 0/24px 24px, var(--card-bg)',
+        }}
+      >
+        <div style={{ position: 'relative', width, minWidth: width }}>
+          <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
+            <defs>
+              <filter id="roadGlow">
+                <feGaussianBlur stdDeviation="3" result="b" />
+                <feMerge>
+                  <feMergeNode in="b" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
+            <path d={pathD} stroke="var(--card-border)" strokeWidth="6" fill="none" strokeLinecap="round" />
+
+            {reachedSegments
+              .filter((s) => s.reached)
+              .map((seg) => (
+                <path
+                  key={seg.key}
+                  d={seg.d}
+                  stroke="#00e5ff"
+                  strokeWidth="5"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeDasharray="10 8"
+                  filter="url(#roadGlow)"
                 >
-                  {p.order_index}
-                </div>
-              </div>
-              <div
+                  <animate attributeName="stroke-dashoffset" values="0;-36" dur="0.7s" repeatCount="indefinite" />
+                </path>
+              ))}
+          </svg>
+
+          {points.map((p, i) => {
+            const s = status(p, i)
+            const icon = getTopicIcon(p.title)
+            return (
+              <Link
+                key={p.id}
+                href={`/lessons/${p.id}`}
+                onClick={(e) => {
+                  if (s === 'locked') handleLockedClick(e, p.id)
+                }}
                 style={{
-                  marginTop: 6,
-                  background: s === 'locked' ? 'transparent' : 'var(--background)',
-                  border: s === 'locked' ? 'none' : '1px solid var(--card-border)',
-                  borderRadius: 8,
-                  padding: s === 'locked' ? '0' : '4px 8px',
-                  display: 'inline-block',
+                  position: 'absolute',
+                  left: p.x,
+                  top: p.y,
+                  transform: 'translate(-50%, -50%)',
+                  textAlign: 'center',
+                  textDecoration: 'none',
+                  width: 110,
                 }}
               >
-                <p style={{ fontSize: 11, fontWeight: 600, margin: 0, color: s === 'locked' ? 'var(--foreground)' : 'var(--accent)', opacity: s === 'locked' ? 0.5 : 1, lineHeight: 1.3 }}>
-                  {p.title}
+                <BulbNode status={s} icon={icon} />
+                <p
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    marginTop: 4,
+                    color: s === 'locked' ? 'var(--foreground-muted)' : s === 'completed' ? '#F3CB4B' : '#00e5ff',
+                    opacity: s === 'locked' ? 0.6 : 1,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {p.order_index}. {p.title}
                 </p>
-              </div>
-            </Link>
-          )
-        })}
+              </Link>
+            )
+          })}
+        </div>
       </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          top: 24,
+          right: 0,
+          width: 40,
+          height: 'calc(100% - 24px)',
+          background: 'linear-gradient(to right, transparent, var(--background))',
+          pointerEvents: 'none',
+        }}
+      />
     </div>
   )
 }

@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import CourseRoadmap from '@/components/CourseRoadmap'
+
+import LessonCard from '@/components/LessonCard'
 
 export default function CoursePage() {
   const params = useParams()
@@ -95,31 +96,6 @@ export default function CoursePage() {
           </div>
         </div>
 
-     <div
-          style={{
-            background: 'var(--card-bg)',
-            border: '1px solid var(--card-border)',
-            borderRadius: 18,
-            padding: '36px 16px',
-            position: 'relative',
-            overflow: 'hidden',
-            boxShadow: '0 8px 30px rgba(0,0,0,0.1)',
-          }}
-        >
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              backgroundImage:
-                'radial-gradient(circle at 15% 10%, rgba(243,203,75,0.05), transparent 30%), radial-gradient(circle at 85% 90%, rgba(79,195,161,0.05), transparent 30%)',
-              pointerEvents: 'none',
-            }}
-          />
-          <div style={{ position: 'relative' }}>
-         <CourseRoadmap lessons={lessons} completedLessonIds={completedLessonIds} />
-          </div>
-        </div>
-      </div>
-    </div>
+     
   )
 }

@@ -15,7 +15,7 @@
 }
 
 [data-theme="dark"] {
-  --background: #0f0c29;
+ --background: #07061a;
   --background-gradient: linear-gradient(135deg, #0f0c29, #1a1a3e 50%, #16213e);
   --foreground: #f5f3ff;
   --foreground-muted: #b8b3d9;
