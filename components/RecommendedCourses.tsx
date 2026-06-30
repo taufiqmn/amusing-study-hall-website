@@ -15,59 +15,87 @@ export default function RecommendedCourses({ courses }: { courses: any[] }) {
         </Link>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
         {courses.map((course) => (
           <div
             key={course.id}
+            className="course-card"
             style={{
               background: 'var(--card-bg)',
               border: '1px solid var(--card-border)',
-              borderRadius: 16,
-              padding: 18,
+              borderRadius: 18,
+              padding: 0,
               boxShadow: 'var(--card-shadow)',
-              backdropFilter: 'blur(10px)',
+              backdropFilter: 'blur(14px)',
               position: 'relative',
               overflow: 'hidden',
+              transition: 'transform 0.25s, box-shadow 0.25s',
             }}
           >
-            <div style={{ position: 'absolute', top: -20, right: -20, width: 80, height: 80, borderRadius: '50%', background: 'radial-gradient(circle, var(--glow-color), transparent 70%)' }} />
+            <div style={{ position: 'absolute', top: -30, right: -30, width: 110, height: 110, borderRadius: '50%', background: 'radial-gradient(circle, var(--glow-color), transparent 70%)', filter: 'blur(2px)' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: 2, background: 'var(--accent-gradient)', opacity: 0.8 }} />
 
-            <p style={{ fontSize: 14, fontWeight: 700, margin: '4px 0 4px', color: 'var(--accent)', lineHeight: 1.3, position: 'relative' }}>
-              {course.title}
-            </p>
-            <p style={{ fontSize: 11, opacity: 0.55, margin: '0 0 14px', fontWeight: 500, position: 'relative' }}>
-              {course.category} — {course.subject}
-            </p>
+            <div style={{ padding: '20px 20px 18px' }}>
+              <p style={{ fontSize: 15, fontWeight: 800, margin: '4px 0 5px', color: 'var(--foreground)', lineHeight: 1.3, position: 'relative' }}>
+                {course.title}
+              </p>
+              <p style={{ fontSize: 11, opacity: 0.55, margin: '0 0 16px', fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase', position: 'relative' }}>
+                {course.category} · {course.subject}
+              </p>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, position: 'relative' }}>
-              <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px dashed var(--card-border)' }} title="Badge — locked" />
-              <p style={{ fontSize: 11, fontWeight: 700, opacity: 0.5, margin: 0 }}>Grade: —</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, position: 'relative' }}>
+                <div
+                  style={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: '50%',
+                    border: '2px dashed var(--card-border)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 14,
+                    opacity: 0.4,
+                  }}
+                  title="Badge — locked"
+                >
+                  🔒
+                </div>
+                <p style={{ fontSize: 11, fontWeight: 700, opacity: 0.5, margin: 0 }}>Grade: —</p>
+              </div>
+
+              <div style={{ background: 'rgba(128,128,128,0.15)', borderRadius: 6, height: 6, marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
+                <div style={{ background: 'var(--accent-gradient)', width: '0%', height: '100%', borderRadius: 6 }} />
+              </div>
+
+              <Link
+                href={`/courses/${course.id}`}
+                style={{
+                  display: 'block',
+                  textAlign: 'center',
+                  fontSize: 13,
+                  padding: '11px 14px',
+                  background: 'var(--accent-gradient)',
+                  color: 'white',
+                  borderRadius: 12,
+                  textDecoration: 'none',
+                  fontWeight: 700,
+                  position: 'relative',
+                  boxShadow: '0 4px 16px rgba(98,0,234,0.25)',
+                }}
+              >
+                Start now →
+              </Link>
             </div>
-
-            <div style={{ background: 'rgba(128,128,128,0.15)', borderRadius: 6, height: 6, marginBottom: 14, position: 'relative' }}>
-              <div style={{ background: 'var(--accent-gradient)', width: '0%', height: '100%', borderRadius: 6 }} />
-            </div>
-
-            <Link
-              href={`/courses/${course.id}`}
-              style={{
-                display: 'block',
-                textAlign: 'center',
-                fontSize: 13,
-                padding: '9px 14px',
-                background: 'var(--accent-gradient)',
-                color: 'white',
-                borderRadius: 10,
-                textDecoration: 'none',
-                fontWeight: 700,
-                position: 'relative',
-              }}
-            >
-              Start now
-            </Link>
           </div>
         ))}
       </div>
+
+      <style>{`
+        .course-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 16px 40px rgba(98,0,234,0.18) !important;
+        }
+      `}</style>
     </div>
   )
 }
