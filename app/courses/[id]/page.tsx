@@ -60,7 +60,7 @@ export default function CoursePage() {
         }}
       />
 
-      <div style={{ position: 'relative', padding: '32px 20px', maxWidth: 760, margin: '0 auto' }}>
+     <div style={{ position: 'relative', padding: '32px 20px', maxWidth: 760, margin: '0 auto' }}>
         <div
           style={{
             background: 'var(--card-bg)',
@@ -96,6 +96,18 @@ export default function CoursePage() {
           </div>
         </div>
 
-     
+        <div>
+          {lessons.map((lesson, i) => {
+            const status = completedLessonIds.includes(lesson.id)
+              ? 'completed'
+              : i === 0 || completedLessonIds.includes(lessons[i - 1]?.id)
+              ? 'unlocked'
+              : 'locked'
+            return <LessonCard key={lesson.id} lesson={lesson} status={status} index={i} />
+          })}
+        </div>
+      </div>
+    </div>
   )
 }
+     
