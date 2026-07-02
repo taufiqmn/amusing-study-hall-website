@@ -21,7 +21,10 @@ import WhatIsAlgorithmContent from '@/components/lessons/WhatIsAlgorithmContent'
 import OracleInstallContent from '@/components/lessons/OracleInstallContent'
 import CBasicSyntaxContent from '@/components/lessons/CBasicSyntaxContent'
 import BigOContent from '@/components/lessons/BigOContent'
-
+import DeterminantContent from '@/components/lessons/DeterminantContent'
+import { determinantLongQuestions } from '@/components/lessons/DeterminantLongQuestions'
+import MinorsCofactorsContent from '@/components/lessons/MinorsCofactorsContent'
+import { minorsCofactorsLongQuestions } from '@/components/lessons/MinorsCofactorsLongQuestions'
 
 function getYouTubeEmbedUrl(url: string) {
   const match = url.match(/(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/)
@@ -205,6 +208,10 @@ const markComplete = async () => {
     <CBasicSyntaxContent />
   ) : lesson.title === 'Time & Space Complexity (Big-O)' ? (
     <BigOContent />
+ ) : lesson.title === 'Determinant of a Matrix' ? (
+    <DeterminantContent />
+  ) : lesson.title === 'Minors and Cofactors' ? (
+    <MinorsCofactorsContent />
   ) : (
     <p style={{ fontSize: 14, lineHeight: 1.7, opacity: 0.85 }}>{lesson.explanation || 'Explanation coming soon.'}</p>
   )}
@@ -230,9 +237,14 @@ const markComplete = async () => {
 <div style={{ marginBottom: 24 }}>
             <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Practice</h2>
             <PracticeSection
-              lessonId={lesson.id}
-              longQuestions={lesson.title === 'Matrix Multiplication' ? matrixMultiplicationLongQuestions : undefined}
-            />
+  lessonId={lesson.id}
+  longQuestions={
+    lesson.title === 'Matrix Multiplication' ? matrixMultiplicationLongQuestions
+    : lesson.title === 'Determinant of a Matrix' ? determinantLongQuestions
+    : lesson.title === 'Minors and Cofactors' ? minorsCofactorsLongQuestions
+    : undefined
+  }
+/>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
             <button
