@@ -62,6 +62,18 @@ const ECHELON_CASES: EchelonCase[] = [
   },
 ];
 
+const COEFF_MATRIX: string[][] = [
+  ["1", "2", "1"],
+  ["1", "−1", "2"],
+  ["1", "1", "−1"],
+];
+
+const AUG_MATRIX: string[][] = [
+  ["1", "2", "1", "|", "6"],
+  ["1", "−1", "2", "|", "3"],
+  ["1", "1", "−1", "|", "4"],
+];
+
 type Tab = "notes" | "quiz" | "long";
 
 export default function SystemOfEquationsContent({
@@ -232,16 +244,17 @@ export default function SystemOfEquationsContent({
               <div className="matrix-row">
                 <div className="matrix">
                   <div className="bracket-l" />
-                  <div className="matrix-grid">
-                    <div className="matrix-cell">1</div>
-                    <div className="matrix-cell">2</div>
-                    <div className="matrix-cell">1</div>
-                    <div className="matrix-cell">1</div>
-                    <div className="matrix-cell">−1</div>
-                    <div className="matrix-cell">2</div>
-                    <div className="matrix-cell">1</div>
-                    <div className="matrix-cell">1</div>
-                    <div className="matrix-cell">−1</div>
+                  <div
+                    className="matrix-grid"
+                    style={{ gridAutoFlow: "row", gridTemplateColumns: "repeat(3, auto)" }}
+                  >
+                    {COEFF_MATRIX.flatMap((row, ri) =>
+                      row.map((cell, ci) => (
+                        <div className="matrix-cell" key={`coeff-${ri}-${ci}`}>
+                          {cell}
+                        </div>
+                      ))
+                    )}
                   </div>
                   <div className="bracket-r" />
                 </div>
@@ -259,20 +272,21 @@ export default function SystemOfEquationsContent({
               <div className="matrix-row">
                 <div className="matrix">
                   <div className="bracket-l" />
-                  <div className="matrix-grid aug">
-                    <div className="matrix-cell">1</div>
-                    <div className="matrix-cell">2</div>
-                    <div className="matrix-cell">1</div>
-                    <div className="matrix-cell">1</div>
-                    <div className="matrix-cell">−1</div>
-                    <div className="matrix-cell">2</div>
-                    <div className="matrix-cell">1</div>
-                    <div className="matrix-cell">1</div>
-                    <div className="matrix-cell">−1</div>
-                    <div className="aug-divider" />
-                    <div className="matrix-cell">6</div>
-                    <div className="matrix-cell">3</div>
-                    <div className="matrix-cell">4</div>
+                  <div
+                    className="matrix-grid aug"
+                    style={{ gridAutoFlow: "row", gridTemplateColumns: "repeat(5, auto)" }}
+                  >
+                    {AUG_MATRIX.flatMap((row, ri) =>
+                      row.map((cell, ci) =>
+                        cell === "|" ? (
+                          <div className="aug-divider" key={`aug-${ri}-${ci}`} />
+                        ) : (
+                          <div className="matrix-cell" key={`aug-${ri}-${ci}`}>
+                            {cell}
+                          </div>
+                        )
+                      )
+                    )}
                   </div>
                   <div className="bracket-r" />
                 </div>
@@ -806,7 +820,7 @@ export default function SystemOfEquationsContent({
         }
         .loe-lesson .matrix-grid {
           display: grid;
-          grid-auto-flow: column;
+          grid-auto-flow: row;
           gap: 4px 18px;
           padding: 10px 14px;
           align-items: center;
