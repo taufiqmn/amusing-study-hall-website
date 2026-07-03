@@ -25,6 +25,7 @@ import DeterminantContent from '@/components/lessons/DeterminantContent'
 import { determinantLongQuestions } from '@/components/lessons/DeterminantLongQuestions'
 import MinorsCofactorsContent from '@/components/lessons/MinorsCofactorsContent'
 import { minorsCofactorsLongQuestions } from '@/components/lessons/MinorsCofactorsLongQuestions'
+import SystemOfEquationsContent from "@/components/lessons/SystemOfEquationsContent";
 
 function getYouTubeEmbedUrl(url: string) {
   const match = url.match(/(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/)
@@ -212,6 +213,8 @@ const markComplete = async () => {
     <DeterminantContent />
   ) : lesson.title === 'Minors and Cofactors' ? (
     <MinorsCofactorsContent />
+  ) : lesson.title === 'System of Linear Equations' ? (
+    <SystemOfEquationsContent lessonId={lesson.id} />
   ) : (
     <p style={{ fontSize: 14, lineHeight: 1.7, opacity: 0.85 }}>{lesson.explanation || 'Explanation coming soon.'}</p>
   )}
@@ -234,7 +237,8 @@ const markComplete = async () => {
               </div>
             </div>
           )}
-<div style={{ marginBottom: 24 }}>
+{lesson.title !== 'System of Linear Equations' && (
+          <div style={{ marginBottom: 24 }}>
             <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Practice</h2>
             <PracticeSection
   lessonId={lesson.id}
@@ -246,6 +250,7 @@ const markComplete = async () => {
   }
 />
           </div>
+        )}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
             <button
               onClick={goToPrev}
