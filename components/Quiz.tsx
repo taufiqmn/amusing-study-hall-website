@@ -4,14 +4,24 @@ import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import MatrixDisplay from '@/components/MatrixDisplay'
 
+// SECURITY: questions come from the `quiz_questions_public` view,
+// which does NOT contain correct_index or explanation.
+// Answers are checked by the `check_quiz_answer` database function,
+// so the correct answer never reaches the browser before you answer.
+
 type Question = {
   id: string
   topic_tag: string
   difficulty: string
   question: string
   options: string[]
+}
+
+type Feedback = {
+  correct: boolean
   correct_index: number
   explanation: string
+  topic_tag: string
 }
 
 export default function Quiz({ lessonId }: { lessonId: string }) {
@@ -20,16 +30,19 @@ export default function Quiz({ lessonId }: { lessonId: string }) {
   const [questions, setQuestions] = useState<Question[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
-  const [answered, setAnswered] = useState(false)
+  const [feedback, setFeedback] = useState<Feedback | null>(null)
+  const [checking, setChecking] = useState(false)
   const [score, setScore] = useState(0)
   const [wrongTags, setWrongTags] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
+
+  const answered = feedback !== null
 
   const startQuiz = async (diff: 'easy' | 'medium' | 'hard') => {
     setLoading(true)
     setDifficulty(diff)
     const { data } = await supabase
-      .from('quiz_questions')
+      .from('quiz_questions_public')
       .select('*')
       .eq('lesson_id', lessonId)
       .eq('difficulty', diff)
@@ -43,20 +56,34 @@ export default function Quiz({ lessonId }: { lessonId: string }) {
     setScore(0)
     setWrongTags([])
     setSelectedAnswer(null)
-    setAnswered(false)
+    setFeedback(null)
     setLoading(false)
     setStage(selected.length > 0 ? 'taking' : 'select')
   }
 
-  const handleSelect = (index: number) => {
-    if (answered) return
+  const handleSelect = async (index: number) => {
+    if (answered || checking) return
+    setChecking(true)
     setSelectedAnswer(index)
-    setAnswered(true)
+
     const current = questions[currentIndex]
-    if (index === current.correct_index) {
+    const { data, error } = await supabase.rpc('check_quiz_answer', {
+      q_id: current.id,
+      answer: index,
+    })
+
+    setChecking(false)
+    if (error || !data || data.error) {
+      setSelectedAnswer(null)
+      return
+    }
+
+    const result = data as Feedback
+    setFeedback(result)
+    if (result.correct) {
       setScore((s) => s + 1)
     } else {
-      setWrongTags((tags) => [...tags, current.topic_tag])
+      setWrongTags((tags) => [...tags, result.topic_tag || current.topic_tag])
     }
   }
 
@@ -64,7 +91,7 @@ export default function Quiz({ lessonId }: { lessonId: string }) {
     if (currentIndex < questions.length - 1) {
       setCurrentIndex((i) => i + 1)
       setSelectedAnswer(null)
-      setAnswered(false)
+      setFeedback(null)
     } else {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
@@ -125,14 +152,16 @@ export default function Quiz({ lessonId }: { lessonId: string }) {
           {current.options.map((opt, i) => {
             let bg = 'var(--background)'
             let border = 'var(--card-border)'
-            if (answered) {
-              if (i === current.correct_index) {
+            if (answered && feedback) {
+              if (i === feedback.correct_index) {
                 bg = 'rgba(79,195,161,0.15)'
                 border = '#4FC3A1'
               } else if (i === selectedAnswer) {
                 bg = 'rgba(226,92,92,0.15)'
                 border = '#e25c5c'
               }
+            } else if (checking && i === selectedAnswer) {
+              border = 'var(--accent)'
             }
             const isMatrixOption = /^\s*(MATRIX:)?\s*\[\s*\[/.test(opt)
             let matrixData: number[][] | null = null
@@ -148,7 +177,7 @@ export default function Quiz({ lessonId }: { lessonId: string }) {
               <button
                 key={i}
                 onClick={() => handleSelect(i)}
-                disabled={answered}
+                disabled={answered || checking}
                 style={{
                   textAlign: 'left',
                   fontSize: 13,
@@ -166,11 +195,13 @@ export default function Quiz({ lessonId }: { lessonId: string }) {
           })}
         </div>
 
-        {answered && (
+        {checking && <p style={{ fontSize: 12, opacity: 0.6, marginBottom: 12 }}>Checking...</p>}
+
+        {answered && feedback && (
           <div style={{ background: 'var(--background)', borderRadius: 10, padding: 12, marginBottom: 16 }}>
             <p style={{ fontSize: 12, opacity: 0.8, margin: 0 }}>
-              {selectedAnswer === current.correct_index ? '✅ Correct! ' : '❌ Not quite. '}
-              {current.explanation}
+              {feedback.correct ? '✅ Correct! ' : '❌ Not quite. '}
+              {feedback.explanation}
             </p>
           </div>
         )}

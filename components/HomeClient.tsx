@@ -6,6 +6,7 @@ import SiteHeader from '@/components/SiteHeader'
 import StatBoxes from '@/components/StatBoxes'
 import RecommendedCourses from '@/components/RecommendedCourses'
 import Footer from '@/components/Footer'
+import Landing from '@/components/landing/Landing'
 
 export default function HomeClient({ courses }: { courses: any[] }) {
   const [user, setUser] = useState<any>(null)
@@ -27,6 +28,21 @@ export default function HomeClient({ courses }: { courses: any[] }) {
 
   const isLoggedIn = !!user
 
+  // Visitors get the cinematic landing page.
+  // Logged-in students get straight to their courses.
+  if (!loading && !isLoggedIn) {
+    return (
+      <div style={{ background: 'var(--background)', minHeight: '100vh' }}>
+        <SiteHeader />
+        <Landing courseCount={courses.length} />
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 20px 32px' }}>
+          <RecommendedCourses courses={courses} />
+          <Footer />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div style={{ background: 'var(--background)', minHeight: '100vh' }}>
       <SiteHeader />
@@ -34,10 +50,10 @@ export default function HomeClient({ courses }: { courses: any[] }) {
       <div style={{ padding: '32px 20px', maxWidth: 1100, width: '100%', margin: '0 auto' }}>
         <div style={{ marginBottom: 28 }}>
           <h1 style={{ fontSize: 30, fontWeight: 800, margin: '0 0 6px', letterSpacing: -0.5 }}>
-            {loading ? 'Amusing Study Hall' : isLoggedIn ? `Welcome back, ${profile?.name}!` : 'Your dream starts here.'}
+            {loading ? 'Amusing Study Hall' : `Welcome back, ${profile?.name}!`}
           </h1>
           <p style={{ fontSize: 14, opacity: 0.6, margin: 0 }}>
-            {!loading && (isLoggedIn ? 'Pick up where you left off below.' : 'Sign up or log in to track your progress as you learn.')}
+            {!loading && 'Pick up where you left off below.'}
           </p>
         </div>
 
