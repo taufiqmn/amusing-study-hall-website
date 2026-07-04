@@ -26,6 +26,7 @@ import { determinantLongQuestions } from '@/components/lessons/DeterminantLongQu
 import MinorsCofactorsContent from '@/components/lessons/MinorsCofactorsContent'
 import { minorsCofactorsLongQuestions } from '@/components/lessons/MinorsCofactorsLongQuestions'
 import SystemOfEquationsContent from "@/components/lessons/SystemOfEquationsContent";
+import InverseMatrixMethodContent from '@/components/lessons/InverseMatrixMethodContent'
 
 function getYouTubeEmbedUrl(url: string) {
   const match = url.match(/(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/)
@@ -215,6 +216,8 @@ const markComplete = async () => {
     <MinorsCofactorsContent />
   ) : lesson.title === 'System of Linear Equations' ? (
     <SystemOfEquationsContent lessonId={lesson.id} />
+  ) : lesson.title === 'Inverse Matrix Method' ? (
+    <InverseMatrixMethodContent lessonId={lesson.id} />
   ) : (
     <p style={{ fontSize: 14, lineHeight: 1.7, opacity: 0.85 }}>{lesson.explanation || 'Explanation coming soon.'}</p>
   )}

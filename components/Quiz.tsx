@@ -134,8 +134,15 @@ export default function Quiz({ lessonId }: { lessonId: string }) {
                 border = '#e25c5c'
               }
             }
-  const isMatrixOption = opt.startsWith('MATRIX:')
-            const matrixData = isMatrixOption ? JSON.parse(opt.replace('MATRIX:', '')) : null
+            const isMatrixOption = /^\s*(MATRIX:)?\s*\[\s*\[/.test(opt)
+            let matrixData: number[][] | null = null
+            if (isMatrixOption) {
+              try {
+                matrixData = JSON.parse(opt.replace(/^MATRIX:/, '').trim())
+              } catch {
+                matrixData = null
+              }
+            }
 
             return (
               <button
@@ -153,7 +160,7 @@ export default function Quiz({ lessonId }: { lessonId: string }) {
                   color: 'var(--foreground)',
                 }}
               >
-                {isMatrixOption ? <MatrixDisplay data={matrixData} /> : opt}
+                {matrixData ? <MatrixDisplay data={matrixData} /> : opt}
               </button>
             )
           })}
