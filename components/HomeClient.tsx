@@ -1,15 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import SiteHeader from '@/components/SiteHeader'
+import StatBoxes from '@/components/StatBoxes'
+import RecommendedCourses from '@/components/RecommendedCourses'
 import Footer from '@/components/Footer'
 import Landing from '@/components/landing/Landing'
-
-// ONE homepage for everyone: the cinematic landing.
-// Logged-in students see a floating "Continue in your dashboard" pill;
-// their real home base is /dashboard (login already redirects there).
 
 export default function HomeClient({
   courses,
@@ -23,41 +20,63 @@ export default function HomeClient({
   lessonCounts?: Record<string, number>
 }) {
   const [user, setUser] = useState<any>(null)
+  const [profile, setProfile] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user))
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+      if (user) {
+        const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+        setProfile(profileData)
+      }
+      setLoading(false)
+    }
+    load()
   }, [])
+
+  const isLoggedIn = !!user
+
+  // Default to the cinematic landing page — this covers guests AND the
+  // brief moment before we know if someone is logged in (avoids flashing
+  // the "Welcome back" dashboard-style view to guests on first load).
+  // Only once we've CONFIRMED the person is logged in do we show the
+  // quick-access StatBoxes/Recommended-courses view instead.
+  if (!isLoggedIn) {
+    return (
+      <div style={{ background: 'var(--background)', minHeight: '100vh' }}>
+        <SiteHeader />
+        <Landing courses={courses} stats={stats} topics={topics} lessonCounts={lessonCounts} />
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 20px 32px' }}>
+          <Footer />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={{ background: 'var(--background)', minHeight: '100vh' }}>
       <SiteHeader />
 
-      {user && (
-        <div style={{ position: 'sticky', top: 64, zIndex: 20, display: 'flex', justifyContent: 'center', padding: '10px 16px 0' }}>
-          <Link
-            href="/dashboard"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              fontSize: 13,
-              fontWeight: 800,
-              padding: '10px 20px',
-              borderRadius: 999,
-              background: 'var(--accent-gradient)',
-              color: 'white',
-              textDecoration: 'none',
-              boxShadow: '0 8px 26px var(--glow-color)',
-            }}
-          >
-            🚀 Continue in your dashboard →
-          </Link>
+      <div style={{ padding: '32px 20px', maxWidth: 1100, width: '100%', margin: '0 auto' }}>
+        <div style={{ marginBottom: 28 }}>
+          <h1 style={{ fontSize: 30, fontWeight: 800, margin: '0 0 6px', letterSpacing: -0.5 }}>
+            {loading ? 'Amusing Study Hall' : `Welcome back, ${profile?.name}!`}
+          </h1>
+          <p style={{ fontSize: 14, opacity: 0.6, margin: 0 }}>
+            {!loading && 'Pick up where you left off below.'}
+          </p>
         </div>
-      )}
 
-      <Landing courses={courses} stats={stats} topics={topics} lessonCounts={lessonCounts} />
+        <div style={{ marginBottom: 32 }}>
+          <StatBoxes isLoggedIn={isLoggedIn} />
+        </div>
 
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 20px 32px' }}>
+        <div style={{ marginBottom: 32 }}>
+          <RecommendedCourses courses={courses} />
+        </div>
+
         <Footer />
       </div>
     </div>

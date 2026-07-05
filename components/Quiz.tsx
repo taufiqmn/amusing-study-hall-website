@@ -28,15 +28,18 @@ export default function Quiz({ lessonId }: { lessonId: string }) {
   const [stage, setStage] = useState<'select' | 'taking' | 'results'>('select')
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('easy')
   const [questions, setQuestions] = useState<Question[]>([])
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
-  const [feedback, setFeedback] = useState<Feedback | null>(null)
-  const [checking, setChecking] = useState(false)
+  // answers/feedback are now keyed by question id, so all questions can be
+  // shown and answered at once instead of one-at-a-time.
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({})
+  const [feedbackMap, setFeedbackMap] = useState<Record<string, Feedback>>({})
+  const [checkingId, setCheckingId] = useState<string | null>(null)
   const [score, setScore] = useState(0)
   const [wrongTags, setWrongTags] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
-  const answered = feedback !== null
+  const allAnswered =
+    questions.length > 0 && questions.every((q) => feedbackMap[q.id] !== undefined)
 
   const startQuiz = async (diff: 'easy' | 'medium' | 'hard') => {
     setLoading(true)
@@ -52,60 +55,60 @@ export default function Quiz({ lessonId }: { lessonId: string }) {
     const selected = shuffled.slice(0, Math.min(10, shuffled.length))
 
     setQuestions(selected)
-    setCurrentIndex(0)
+    setSelectedAnswers({})
+    setFeedbackMap({})
     setScore(0)
     setWrongTags([])
-    setSelectedAnswer(null)
-    setFeedback(null)
     setLoading(false)
     setStage(selected.length > 0 ? 'taking' : 'select')
   }
 
-  const handleSelect = async (index: number) => {
-    if (answered || checking) return
-    setChecking(true)
-    setSelectedAnswer(index)
+  const handleSelect = async (question: Question, index: number) => {
+    if (feedbackMap[question.id] || checkingId) return
+    setCheckingId(question.id)
+    setSelectedAnswers((prev) => ({ ...prev, [question.id]: index }))
 
-    const current = questions[currentIndex]
     const { data, error } = await supabase.rpc('check_quiz_answer', {
-      q_id: current.id,
+      q_id: question.id,
       answer: index,
     })
 
-    setChecking(false)
+    setCheckingId(null)
     if (error || !data || data.error) {
-      setSelectedAnswer(null)
+      setSelectedAnswers((prev) => {
+        const next = { ...prev }
+        delete next[question.id]
+        return next
+      })
       return
     }
 
     const result = data as Feedback
-    setFeedback(result)
+    setFeedbackMap((prev) => ({ ...prev, [question.id]: result }))
     if (result.correct) {
       setScore((s) => s + 1)
     } else {
-      setWrongTags((tags) => [...tags, result.topic_tag || current.topic_tag])
+      setWrongTags((tags) => [...tags, result.topic_tag || question.topic_tag])
     }
   }
 
-  const handleNext = async () => {
-    if (currentIndex < questions.length - 1) {
-      setCurrentIndex((i) => i + 1)
-      setSelectedAnswer(null)
-      setFeedback(null)
-    } else {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        await supabase.from('quiz_attempts').insert({
-          user_id: user.id,
-          lesson_id: lessonId,
-          difficulty,
-          score,
-          total_questions: questions.length,
-          wrong_topic_tags: wrongTags,
-        })
-      }
-      setStage('results')
+  const handleFinish = async () => {
+    setSubmitting(true)
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (user) {
+      await supabase.from('quiz_attempts').insert({
+        user_id: user.id,
+        lesson_id: lessonId,
+        difficulty,
+        score,
+        total_questions: questions.length,
+        wrong_topic_tags: wrongTags,
+      })
     }
+    setSubmitting(false)
+    setStage('results')
   }
 
   if (stage === 'select') {
@@ -140,80 +143,115 @@ export default function Quiz({ lessonId }: { lessonId: string }) {
   }
 
   if (stage === 'taking') {
-    const current = questions[currentIndex]
     return (
-      <div style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)', borderRadius: 14, padding: 20 }}>
-        <p style={{ fontSize: 11, opacity: 0.6, marginBottom: 8 }}>
-          Question {currentIndex + 1} of {questions.length} — {difficulty}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <p style={{ fontSize: 12, opacity: 0.6 }}>
+          {questions.length} questions — {difficulty} · answer all, then submit
         </p>
-        <p style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>{current.question}</p>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
-          {current.options.map((opt, i) => {
-            let bg = 'var(--background)'
-            let border = 'var(--card-border)'
-            if (answered && feedback) {
-              if (i === feedback.correct_index) {
-                bg = 'rgba(79,195,161,0.15)'
-                border = '#4FC3A1'
-              } else if (i === selectedAnswer) {
-                bg = 'rgba(226,92,92,0.15)'
-                border = '#e25c5c'
-              }
-            } else if (checking && i === selectedAnswer) {
-              border = 'var(--accent)'
-            }
-            const isMatrixOption = /^\s*(MATRIX:)?\s*\[\s*\[/.test(opt)
-            let matrixData: number[][] | null = null
-            if (isMatrixOption) {
-              try {
-                matrixData = JSON.parse(opt.replace(/^MATRIX:/, '').trim())
-              } catch {
-                matrixData = null
-              }
-            }
+        {questions.map((current, qIndex) => {
+          const feedback = feedbackMap[current.id]
+          const selectedAnswer = selectedAnswers[current.id]
+          const answered = feedback !== undefined
+          const checking = checkingId === current.id
 
-            return (
-              <button
-                key={i}
-                onClick={() => handleSelect(i)}
-                disabled={answered || checking}
-                style={{
-                  textAlign: 'left',
-                  fontSize: 13,
-                  padding: isMatrixOption ? '6px 14px' : '10px 14px',
-                  borderRadius: 10,
-                  border: `1.5px solid ${border}`,
-                  background: bg,
-                  cursor: answered ? 'default' : 'pointer',
-                  color: 'var(--foreground)',
-                }}
-              >
-                {matrixData ? <MatrixDisplay data={matrixData} /> : opt}
-              </button>
-            )
-          })}
-        </div>
+          return (
+            <div
+              key={current.id}
+              style={{
+                background: 'var(--card-bg)',
+                border: '1px solid var(--card-border)',
+                borderRadius: 14,
+                padding: 20,
+              }}
+            >
+              <p style={{ fontSize: 11, opacity: 0.6, marginBottom: 8 }}>
+                Question {qIndex + 1} of {questions.length}
+              </p>
+              <p style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>{current.question}</p>
 
-        {checking && <p style={{ fontSize: 12, opacity: 0.6, marginBottom: 12 }}>Checking...</p>}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+                {current.options.map((opt, i) => {
+                  let bg = 'var(--background)'
+                  let border = 'var(--card-border)'
+                  if (answered && feedback) {
+                    if (i === feedback.correct_index) {
+                      bg = 'rgba(79,195,161,0.15)'
+                      border = '#4FC3A1'
+                    } else if (i === selectedAnswer) {
+                      bg = 'rgba(226,92,92,0.15)'
+                      border = '#e25c5c'
+                    }
+                  } else if (checking && i === selectedAnswer) {
+                    border = 'var(--accent)'
+                  }
+                  const isMatrixOption = /^\s*(MATRIX:)?\s*\[\s*\[/.test(opt)
+                  let matrixData: number[][] | null = null
+                  if (isMatrixOption) {
+                    try {
+                      matrixData = JSON.parse(opt.replace(/^MATRIX:/, '').trim())
+                    } catch {
+                      matrixData = null
+                    }
+                  }
 
-        {answered && feedback && (
-          <div style={{ background: 'var(--background)', borderRadius: 10, padding: 12, marginBottom: 16 }}>
-            <p style={{ fontSize: 12, opacity: 0.8, margin: 0 }}>
-              {feedback.correct ? '✅ Correct! ' : '❌ Not quite. '}
-              {feedback.explanation}
-            </p>
-          </div>
-        )}
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => handleSelect(current, i)}
+                      disabled={answered || checking}
+                      style={{
+                        textAlign: 'left',
+                        fontSize: 13,
+                        padding: isMatrixOption ? '6px 14px' : '10px 14px',
+                        borderRadius: 10,
+                        border: `1.5px solid ${border}`,
+                        background: bg,
+                        cursor: answered ? 'default' : 'pointer',
+                        color: 'var(--foreground)',
+                      }}
+                    >
+                      {matrixData ? <MatrixDisplay data={matrixData} /> : opt}
+                    </button>
+                  )
+                })}
+              </div>
 
-        {answered && (
-          <button
-            onClick={handleNext}
-            style={{ fontSize: 13, fontWeight: 700, padding: '10px 20px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 10, cursor: 'pointer' }}
-          >
-            {currentIndex < questions.length - 1 ? 'Next question →' : 'See results'}
-          </button>
-        )}
+              {checking && <p style={{ fontSize: 12, opacity: 0.6, marginBottom: 4 }}>Checking...</p>}
+
+              {answered && feedback && (
+                <div style={{ background: 'var(--background)', borderRadius: 10, padding: 12 }}>
+                  <p style={{ fontSize: 12, opacity: 0.8, margin: 0 }}>
+                    {feedback.correct ? '✅ Correct! ' : '❌ Not quite. '}
+                    {feedback.explanation}
+                  </p>
+                </div>
+              )}
+            </div>
+          )
+        })}
+
+        <button
+          onClick={handleFinish}
+          disabled={!allAnswered || submitting}
+          style={{
+            fontSize: 14,
+            fontWeight: 700,
+            padding: '12px 24px',
+            background: allAnswered ? 'var(--accent)' : 'var(--card-border)',
+            color: 'white',
+            border: 'none',
+            borderRadius: 10,
+            cursor: allAnswered ? 'pointer' : 'not-allowed',
+            alignSelf: 'center',
+          }}
+        >
+          {submitting
+            ? 'Submitting...'
+            : allAnswered
+            ? `Submit Quiz (${score}/${questions.length} so far)`
+            : `Answer all ${questions.length} questions to submit`}
+        </button>
       </div>
     )
   }
