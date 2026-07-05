@@ -21,6 +21,7 @@
   --glow-color: rgba(217, 119, 6, 0.18);
   --pill-bg: rgba(109, 40, 217, 0.08);
   --shine: rgba(255, 255, 255, 0.85);
+  --card-tint: rgba(109, 40, 217, 0.10);
 }
 
 [data-theme="dark"] {
@@ -38,6 +39,7 @@
   --glow-color: rgba(139, 92, 246, 0.32);
   --pill-bg: rgba(139, 92, 246, 0.16);
   --shine: rgba(255, 255, 255, 0.16);
+  --card-tint: rgba(139, 92, 246, 0.22);
 }
 
 @theme inline {

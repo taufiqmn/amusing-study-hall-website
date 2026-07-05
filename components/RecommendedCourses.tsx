@@ -2,6 +2,22 @@
 
 import Link from 'next/link'
 
+const CATEGORY_ICON: Record<string, string> = {
+  hsc: '📐',
+  skills: '💻',
+  'computer science': '🧠',
+  matrix: '📐',
+  java: '☕',
+  c: '💻',
+  database: '🗄️',
+  dsa: '🧠',
+}
+
+function getIcon(course: any) {
+  const key = String(course.category || course.subject || '').toLowerCase()
+  return CATEGORY_ICON[key] || '📘'
+}
+
 export default function RecommendedCourses({ courses }: { courses: any[] }) {
   return (
     <div>
@@ -21,7 +37,7 @@ export default function RecommendedCourses({ courses }: { courses: any[] }) {
             key={course.id}
             className="course-card"
             style={{
-              background: 'var(--card-bg)',
+              background: 'linear-gradient(160deg, var(--card-tint), transparent 60%), var(--card-bg)',
               border: '1px solid var(--card-border)',
               borderRadius: 18,
               padding: 0,
@@ -37,13 +53,42 @@ export default function RecommendedCourses({ courses }: { courses: any[] }) {
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: 2, background: 'var(--accent-gradient)', opacity: 0.8 }} />
 
             <div style={{ padding: '20px 20px 18px' }}>
-              <p style={{ fontSize: 15, fontWeight: 800, margin: '4px 0 5px', color: 'var(--foreground)', lineHeight: 1.3, position: 'relative' }}>
-                {course.title}
-              </p>
-              <p style={{ fontSize: 11, opacity: 0.55, margin: '0 0 16px', fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase', position: 'relative' }}>
-                {course.category} · {course.subject}
+              {/* Icon */}
+              <div
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  background: 'var(--accent-gradient)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 18,
+                  marginBottom: 12,
+                  position: 'relative',
+                  boxShadow: '0 0 16px 2px var(--glow-color), 0 4px 10px var(--card-tint)',
+                }}
+              >
+                {getIcon(course)}
+              </div>
+
+              {/* Category tag */}
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--accent)', margin: '0 0 6px', position: 'relative' }}>
+                {course.category}
               </p>
 
+              {/* Title */}
+              <p style={{ fontSize: 15, fontWeight: 800, margin: '0 0 6px', color: 'var(--foreground)', lineHeight: 1.3, position: 'relative' }}>
+                {course.title}
+              </p>
+
+              {/* Meta line: lessons · Free */}
+              <p style={{ fontSize: 12, opacity: 0.55, margin: '0 0 16px', fontWeight: 600, position: 'relative' }}>
+                {course.lessons ? `${course.lessons} lessons · ` : ''}
+                {course.price ? course.price : 'Free'}
+              </p>
+
+              {/* Grade / badge row */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, position: 'relative' }}>
                 <div
                   style={{
@@ -64,7 +109,7 @@ export default function RecommendedCourses({ courses }: { courses: any[] }) {
                 <p style={{ fontSize: 11, fontWeight: 700, opacity: 0.5, margin: 0 }}>Grade: —</p>
               </div>
 
-              <div style={{ background: 'rgba(128,128,128,0.15)', borderRadius: 6, height: 6, marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
+              <div style={{ background: 'var(--card-border)', opacity: 0.5, borderRadius: 6, height: 6, marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
                 <div style={{ background: 'var(--accent-gradient)', width: '0%', height: '100%', borderRadius: 6 }} />
               </div>
 
@@ -81,7 +126,7 @@ export default function RecommendedCourses({ courses }: { courses: any[] }) {
                   textDecoration: 'none',
                   fontWeight: 700,
                   position: 'relative',
-                  boxShadow: '0 4px 16px rgba(98,0,234,0.25)',
+                  boxShadow: '0 4px 16px var(--card-tint)',
                 }}
               >
                 Start now →
@@ -94,7 +139,7 @@ export default function RecommendedCourses({ courses }: { courses: any[] }) {
       <style>{`
         .course-card:hover {
           transform: translateY(-5px);
-          box-shadow: 0 16px 40px rgba(98,0,234,0.18) !important;
+          box-shadow: 0 16px 40px var(--card-tint) !important;
         }
       `}</style>
     </div>
