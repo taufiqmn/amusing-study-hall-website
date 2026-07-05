@@ -144,7 +144,7 @@ export default function Landing({
             across math, programming, databases and more. No fees. No ads. Just study.
           </p>
           <div className={styles.ctaRowLeft}>
-            <Link href="/courses" className={styles.ctaPrimary}>Start learning free →</Link>
+            <Link href="/dashboard" className={styles.ctaPrimary}>Start learning free →</Link>
             <Link href="/signup" className={styles.ctaGhost}>Create account</Link>
           </div>
           <div className={styles.statChips}>
@@ -285,7 +285,7 @@ export default function Landing({
         </h2>
         <p className={styles.finaleSub}>Free forever. Made by a student, for students.</p>
         <div className={styles.ctaRow} style={{ opacity: 1, animation: 'none' }}>
-          <Link href="/courses" className={styles.ctaPrimary}>Browse courses →</Link>
+          <Link href="/dashboard" className={styles.ctaPrimary}>Browse courses →</Link>
         </div>
       </section>
     </div>

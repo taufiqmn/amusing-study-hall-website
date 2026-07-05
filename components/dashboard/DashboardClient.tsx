@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import ReviewQuiz from './ReviewQuiz'
+import RecommendedCourses from '@/components/RecommendedCourses'
 import styles from './dashboard.module.css'
 
 // ============================================================
@@ -79,11 +80,22 @@ export default function DashboardClient() {
   const [profile, setProfile] = useState<any>(null)
   const [d, setD] = useState<any>(null)
   const [showReview, setShowReview] = useState(false)
+  const [isGuest, setIsGuest] = useState(false)
+  const [recCourses, setRecCourses] = useState<any[]>([])
 
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
+
+      if (!user) {
+        // GUEST MODE: no redirect — show the dashboard shell with
+        // recommended courses and locked progress sections instead.
+        setIsGuest(true)
+        const { data: courses } = await supabase.from('courses').select('*').limit(4)
+        setRecCourses(courses || [])
+        setLoading(false)
+        return
+      }
 
       const [{ data: profileData }, { data: logs }, { data: prog }, { data: attempts }, { data: lessons }, { data: courses }] =
         await Promise.all([
@@ -96,6 +108,7 @@ export default function DashboardClient() {
         ])
 
       setProfile(profileData)
+      setRecCourses((courses || []).slice(0, 4))
 
       const L = logs || [], P = prog || [], A = attempts || [], LS = lessons || [], CS = courses || []
       const dayKey = (x: string | Date) => { const dt = new Date(x); return `${dt.getFullYear()}-${dt.getMonth()}-${dt.getDate()}` }
@@ -172,7 +185,57 @@ export default function DashboardClient() {
   const quizzesUp = useCountUp(d?.quizzes || 0)
   const avgUp = useCountUp(d?.avgPct || 0)
 
-  if (loading || !d) {
+  if (loading) {
+    return <div className={styles.wrap}><p style={{ fontSize: 13, opacity: 0.6 }}>Loading your cockpit…</p></div>
+  }
+
+  if (isGuest) {
+    return (
+      <div className={styles.wrap}>
+        <div className={`${styles.headRow} ${styles.enter}`}>
+          <div>
+            <h1 className={styles.hello}>Welcome to Amusing Study Hall! 👋</h1>
+            <p className={styles.helloSub}>Browse courses below, or log in to unlock your progress, streaks and badges.</p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <Link href="/courses" className={styles.resumeBtn} style={{ padding: '8px 16px' }}>Browse courses</Link>
+            <Link href="/login" className={styles.resumeBtn} style={{ padding: '8px 16px' }}>Log in</Link>
+          </div>
+        </div>
+
+        <div className={`${styles.card} ${styles.enter}`} style={{ marginTop: 14 }}>
+          <p className={styles.cardTag}>Recommended courses</p>
+          {recCourses.length > 0 ? (
+            <RecommendedCourses courses={recCourses} />
+          ) : (
+            <p style={{ fontSize: 13, opacity: 0.6, margin: 0 }}>Courses are loading — check back in a moment.</p>
+          )}
+        </div>
+
+        <div
+          className={`${styles.card} ${styles.enter}`}
+          style={{ marginTop: 14, textAlign: 'center', filter: 'blur(2.5px)', opacity: 0.6, pointerEvents: 'none', userSelect: 'none' }}
+        >
+          <p className={styles.cardTag}>Your progress</p>
+          <div className={styles.rings}>
+            <Ring pct={0} color={RING_COLORS[0]} label="Course" />
+            <Ring pct={0} color={RING_COLORS[1]} label="Course" />
+            <Ring pct={0} color={RING_COLORS[2]} label="Course" />
+          </div>
+        </div>
+        <div style={{ textAlign: 'center', marginTop: -10 }}>
+          <Link
+            href="/login"
+            style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)', textDecoration: 'none' }}
+          >
+            🔒 Log in to see your full progress →
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  if (!d) {
     return <div className={styles.wrap}><p style={{ fontSize: 13, opacity: 0.6 }}>Loading your cockpit…</p></div>
   }
 
@@ -195,6 +258,9 @@ export default function DashboardClient() {
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Link href="/courses" className={styles.streakChip} style={{ textDecoration: 'none' }}>
+            📚 Courses
+          </Link>
           <div className={styles.streakChip}>
             <span className={styles.flame}>🔥</span>
             {d.streak > 0 ? `${d.streak}-day streak` : 'Start a streak today'}
@@ -294,6 +360,18 @@ export default function DashboardClient() {
       </div>
 
       {showReview && <ReviewQuiz tags={d.weakTopics} onClose={() => setShowReview(false)} />}
+
+      {/* recommended courses */}
+      <div className={`${styles.card} ${styles.enter}`} style={{ marginTop: 14 }}>
+        <p className={styles.cardTag} style={{ color: 'var(--foreground-muted)' }}>Recommended for you</p>
+        {recCourses.length > 0 ? (
+          <RecommendedCourses courses={recCourses} />
+        ) : (
+          <p style={{ fontSize: 13, opacity: 0.6, margin: 0 }}>
+            <Link href="/courses" style={{ color: 'var(--accent)' }}>Browse all courses →</Link>
+          </p>
+        )}
+      </div>
 
       {/* badges */}
       <div className={`${styles.card} ${styles.enter}`} style={{ marginTop: 14, ...delay(9) }}>
