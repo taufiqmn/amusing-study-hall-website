@@ -103,6 +103,19 @@ export default function SystemOfEquationsContent({
           <div className="chalk-rule" />
         </div>
 
+        {/* VIDEO LESSON */}
+        <div className="video-embed">
+          <iframe
+            width="100%"
+            height="100%"
+            src="https://www.youtube.com/embed/3Tn1NmuEe-w?start=88"
+            title="System of Linear Equations — Video Lesson"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+
         {/* TAB BAR */}
         <div className="loe-tabbar">
           <button
@@ -1017,6 +1030,24 @@ export default function SystemOfEquationsContent({
           font-size: 1rem;
           margin-top: 50px;
           opacity: 0.8;
+        }
+        .loe-lesson .video-embed {
+          position: relative;
+          width: 100%;
+          padding-top: 56.25%; /* 16:9 aspect ratio */
+          margin: 24px 0 36px;
+          border-radius: 14px;
+          overflow: hidden;
+          border: 1px solid var(--loe-line);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        }
+        .loe-lesson .video-embed iframe {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          border: 0;
         }
         .loe-lesson .divider-dots {
           text-align: center;
