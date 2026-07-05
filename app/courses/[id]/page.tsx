@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-
-import LessonCard from '@/components/LessonCard'
+import SiteHeader from '@/components/SiteHeader'
+import CourseRoadmapPath from '@/components/CourseRoadmapPath'
 
 export default function CoursePage() {
   const params = useParams()
@@ -12,7 +12,7 @@ export default function CoursePage() {
 
   const [course, setCourse] = useState<any>(null)
   const [lessons, setLessons] = useState<any[]>([])
- const [completedLessonIds, setCompletedLessonIds] = useState<string[]>([])
+  const [completedLessonIds, setCompletedLessonIds] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -22,12 +22,12 @@ export default function CoursePage() {
 
       const { data: lessonData } = await supabase
         .from('lessons')
-        .select('*')
+        .select('id, title, explanation, order_index')
         .eq('course_id', courseId)
         .order('order_index', { ascending: true })
       setLessons(lessonData || [])
 
- const { data: { user } } = await supabase.auth.getUser()
+      const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         const { data: progressData } = await supabase
           .from('progress')
@@ -37,77 +37,56 @@ export default function CoursePage() {
           .eq('status', 'completed')
         setCompletedLessonIds((progressData || []).map((p) => p.lesson_id))
       }
-
       setLoading(false)
     }
     load()
   }, [courseId])
 
-  if (loading) return <p style={{ padding: 20 }}>Loading...</p>
-
   const totalLessons = lessons.length
-  const completedCount = completedLessonIds.length
   const progressPct = totalLessons > 0 ? Math.round((completedLessonIds.length / totalLessons) * 100) : 0
+
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', background: 'var(--background)', overflow: 'hidden' }}>
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage:
-            'radial-gradient(circle at 20% 20%, rgba(243,203,75,0.06), transparent 35%), radial-gradient(circle at 80% 0%, rgba(79,195,161,0.06), transparent 35%)',
-          pointerEvents: 'none',
-        }}
-      />
+    <div style={{ background: 'var(--background)', minHeight: '100vh' }}>
+      <SiteHeader />
 
-     <div style={{ position: 'relative', padding: '32px 20px', maxWidth: 760, margin: '0 auto' }}>
-        <div
-          style={{
-            background: 'var(--card-bg)',
-            border: '1px solid var(--card-border)',
-            borderRadius: 18,
-            padding: '24px 28px',
-            marginBottom: 28,
-          }}
-        >
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'var(--accent)', textTransform: 'uppercase', margin: '0 0 6px' }}>
-            {course?.category} — {course?.subject}
-          </p>
-          <h1 style={{ fontSize: 26, fontWeight: 800, margin: '0 0 6px', lineHeight: 1.2 }}>{course?.title}</h1>
-          <p style={{ fontSize: 13, opacity: 0.65, margin: '0 0 18px' }}>
-            Complete lessons in order to unlock the next one on your path.
-          </p>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ flex: 1, background: 'rgba(128,128,128,0.15)', borderRadius: 8, height: 8, overflow: 'hidden' }}>
-              <div
-                style={{
-                  background: 'linear-gradient(90deg, #F3CB4B, #4FC3A1)',
-                  width: `${progressPct}%`,
-                  height: '100%',
-                  borderRadius: 8,
-                  transition: 'width 0.6s ease',
-                }}
-              />
+      <div style={{ position: 'relative', padding: '28px 20px 40px', maxWidth: 900, margin: '0 auto' }}>
+        {loading ? (
+          <p style={{ fontSize: 13, opacity: 0.6 }}>Loading your path…</p>
+        ) : (
+          <>
+            <div
+              style={{
+                position: 'relative',
+                background: 'var(--card-bg)',
+                border: '1px solid var(--card-border)',
+                borderRadius: 18,
+                padding: '24px 28px',
+                marginBottom: 30,
+                overflow: 'hidden',
+              }}
+            >
+              <span className="shine-overlay" aria-hidden="true" />
+              <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.4, color: 'var(--accent)', textTransform: 'uppercase', margin: '0 0 6px' }}>
+                {course?.category} — {course?.subject}
+              </p>
+              <h1 style={{ fontSize: 26, fontWeight: 800, margin: '0 0 6px', lineHeight: 1.2 }}>{course?.title}</h1>
+              <p style={{ fontSize: 13, opacity: 0.65, margin: '0 0 18px' }}>
+                Complete lessons in order — each finished bulb lights the next one on your path.
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ flex: 1, background: 'var(--pill-bg)', borderRadius: 8, height: 8, overflow: 'hidden' }}>
+                  <div style={{ background: 'var(--accent-gradient)', width: `${progressPct}%`, height: '100%', borderRadius: 8, transition: 'width 1s cubic-bezier(0.16,1,0.3,1)' }} />
+                </div>
+                <p style={{ fontSize: 12, fontWeight: 800, whiteSpace: 'nowrap', margin: 0 }}>
+                  {completedLessonIds.length}/{totalLessons} lessons
+                </p>
+              </div>
             </div>
-            <p style={{ fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', margin: 0 }}>
-              {completedLessonIds.length}/{totalLessons} lessons
-            </p>
-          </div>
-        </div>
 
-        <div>
-          {lessons.map((lesson, i) => {
-            const status = completedLessonIds.includes(lesson.id)
-              ? 'completed'
-              : i === 0 || completedLessonIds.includes(lessons[i - 1]?.id)
-              ? 'unlocked'
-              : 'locked'
-            return <LessonCard key={lesson.id} lesson={lesson} status={status} index={i} />
-          })}
-        </div>
+            <CourseRoadmapPath lessons={lessons} completedIds={completedLessonIds} />
+          </>
+        )}
       </div>
     </div>
   )
 }
-     

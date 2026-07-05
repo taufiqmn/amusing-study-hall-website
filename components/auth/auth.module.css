@@ -1,0 +1,181 @@
+.screen {
+  display: flex;
+  min-height: 100vh;
+  background: var(--background-gradient);
+}
+
+/* ---------- brand panel ---------- */
+.brandPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 36px 44px;
+  background:
+    radial-gradient(circle at 15% 20%, var(--glow-color), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(34, 211, 238, 0.16), transparent 45%),
+    var(--background);
+  border-right: 1px solid var(--card-border);
+}
+
+.brandRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.logo { width: 34px; height: 34px; border-radius: 50%; }
+.logoSm { width: 22px; height: 22px; border-radius: 50%; vertical-align: middle; }
+
+.brandTitle {
+  font-size: clamp(26px, 3vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  margin: 0 0 22px;
+}
+.gold { color: var(--gold, #fbbf24); font-style: normal; }
+.cyan { color: var(--accent-2, #22d3ee); font-style: normal; }
+
+.brandList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--foreground-muted);
+}
+
+.brandFoot { font-size: 12px; color: var(--foreground-muted); margin: 0; }
+
+/* ---------- form side ---------- */
+.formSide {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+}
+
+.formCard {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 30px 28px;
+  backdrop-filter: blur(12px);
+  box-shadow: var(--card-shadow);
+}
+
+.mobileBrand {
+  display: none;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--foreground);
+  text-decoration: none;
+  margin-bottom: 16px;
+}
+
+.title { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin: 0 0 6px; }
+.sub { font-size: 13px; color: var(--foreground-muted); margin: 0 0 22px; }
+
+.form { display: flex; flex-direction: column; gap: 14px; }
+
+.label {
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--foreground-muted);
+  margin: 0 0 5px;
+  display: block;
+}
+
+.input, .select {
+  width: 100%;
+  font-size: 14px;
+  padding: 12px 14px;
+  border-radius: 11px;
+  border: 1.5px solid var(--card-border);
+  background: var(--background);
+  color: var(--foreground);
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input:focus, .select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--pill-bg);
+}
+
+.pwRow { position: relative; }
+.pwToggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+  opacity: 0.6;
+}
+.pwToggle:hover { opacity: 1; }
+
+.submit {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 13px;
+  border-radius: 12px;
+  border: none;
+  background: var(--accent-gradient);
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 8px 26px var(--glow-color);
+  transition: transform 0.2s, opacity 0.2s;
+}
+.submit:hover { transform: translateY(-2px); }
+.submit:disabled { opacity: 0.6; cursor: wait; transform: none; }
+
+.error {
+  font-size: 12.5px;
+  color: #e25c5c;
+  background: rgba(226, 92, 92, 0.1);
+  border: 1px solid rgba(226, 92, 92, 0.4);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 0;
+}
+
+.success {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #4FC3A1;
+  background: rgba(79, 195, 161, 0.1);
+  border: 1px solid rgba(79, 195, 161, 0.4);
+  border-radius: 12px;
+  padding: 14px;
+  margin: 0;
+}
+
+.swap {
+  font-size: 13px;
+  text-align: center;
+  color: var(--foreground-muted);
+  margin: 18px 0 0;
+}
+.swap a { color: var(--accent); font-weight: 800; text-decoration: none; }
+
+@media (max-width: 780px) {
+  .brandPanel { display: none; }
+  .mobileBrand { display: block; }
+}

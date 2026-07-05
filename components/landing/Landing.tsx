@@ -40,7 +40,7 @@ function Marquee({ topics }: { topics: string[] }) {
   )
 }
 
-function CourseHighlights({ courses, lessonCounts }: { courses: any[]; lessonCounts: Record<string, number> }) {
+export function CourseHighlights({ courses, lessonCounts }: { courses: any[]; lessonCounts: Record<string, number> }) {
   if (!courses || courses.length === 0) return null
   return (
     <section className={styles.highlights}>
@@ -72,11 +72,13 @@ export default function Landing({
   stats = { courses: 0, lessons: 0, quizzes: 0 },
   topics = [],
   lessonCounts = {},
+  isLoggedIn = false,
 }: {
   courses?: any[]
   stats?: Stats
   topics?: string[]
   lessonCounts?: Record<string, number>
+  isLoggedIn?: boolean
 }) {
   const pathRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -144,8 +146,17 @@ export default function Landing({
             across math, programming, databases and more. No fees. No ads. Just study.
           </p>
           <div className={styles.ctaRowLeft}>
-            <Link href="/dashboard" className={styles.ctaPrimary}>Start learning free →</Link>
-            <Link href="/signup" className={styles.ctaGhost}>Create account</Link>
+            {isLoggedIn ? (
+              <>
+                <Link href="/dashboard" className={styles.ctaPrimary}>Continue in your dashboard →</Link>
+                <Link href="/courses" className={styles.ctaGhost}>Browse courses</Link>
+              </>
+            ) : (
+              <>
+                <Link href="/courses" className={styles.ctaPrimary}>Start learning free →</Link>
+                <Link href="/signup" className={styles.ctaGhost}>Create account</Link>
+              </>
+            )}
           </div>
           <div className={styles.statChips}>
             <div className={styles.statChip}><b>{stats.courses}</b><span>courses</span></div>
@@ -285,7 +296,7 @@ export default function Landing({
         </h2>
         <p className={styles.finaleSub}>Free forever. Made by a student, for students.</p>
         <div className={styles.ctaRow} style={{ opacity: 1, animation: 'none' }}>
-          <Link href="/dashboard" className={styles.ctaPrimary}>Browse courses →</Link>
+          <Link href="/courses" className={styles.ctaPrimary}>Browse courses →</Link>
         </div>
       </section>
     </div>
