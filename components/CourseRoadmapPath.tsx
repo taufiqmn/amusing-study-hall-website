@@ -4,17 +4,17 @@ import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import styles from './CourseRoadmapPath.module.css'
 
-// ZIGZAG ROADMAP — the course path as a journey:
-// a glowing line draws itself as you scroll, lessons alternate
-// right / left, cards slide in with a shine, and each stop shows
-// its state: 💡 lit (up next), 🎓 capped bulb (completed), 🔒 dim (locked).
+// ZIGZAG ROADMAP v2:
+// - the bulb (with cap / lock state) sits in the CORNER of each lesson card
+// - the center line carries ONLY the glowing sun/orb that rides down on scroll
+// - cards still alternate right / left and slide in with a shine
 
 type Lesson = { id: string; title: string; explanation?: string }
 type Status = 'completed' | 'unlocked' | 'locked'
 
 function GradCap() {
   return (
-    <svg width={26} height={22} viewBox="0 0 100 86" className={styles.cap} aria-hidden="true">
+    <svg width={24} height={20} viewBox="0 0 100 86" className={styles.cap} aria-hidden="true">
       <path d="M30 42 L30 54 Q30 66 50 66 Q70 66 70 54 L70 42 Z" fill="#1A1A2E" stroke="#F3CB4B" strokeWidth="4" strokeLinejoin="round" />
       <path d="M6 32 L6 40 L50 60 L94 40 L94 32 L50 52 Z" fill="#0f0e22" stroke="#F3CB4B" strokeWidth="3" strokeLinejoin="round" />
       <path d="M6 32 L50 12 L94 32 L50 52 Z" fill="#1A1A2E" stroke="#F3CB4B" strokeWidth="4" strokeLinejoin="round" />
@@ -25,13 +25,14 @@ function GradCap() {
   )
 }
 
-function Node({ status }: { status: Status }) {
+// corner bulb badge that lives on the card
+function CornerBulb({ status }: { status: Status }) {
   return (
-    <div className={`${styles.node} ${styles['node_' + status]}`}>
+    <div className={`${styles.corner} ${styles['corner_' + status]}`}>
       {status === 'completed' && <GradCap />}
       <span className={styles.bulb}>💡</span>
       {status === 'locked' && <span className={styles.lock}>🔒</span>}
-      <div className={styles.nodeGlow} aria-hidden="true" />
+      <div className={styles.cornerGlow} aria-hidden="true" />
     </div>
   )
 }
@@ -83,7 +84,7 @@ export default function CourseRoadmapPath({ lessons, completedIds }: { lessons: 
   return (
     <div className={styles.wrap} ref={wrapRef}>
       <div className={styles.line}><div className={styles.fill} /></div>
-      <div className={styles.orb} aria-hidden="true" />
+      <div className={styles.sun} aria-hidden="true">☀️</div>
 
       {lessons.map((lesson, i) => {
         const status = statusOf(i)
@@ -91,6 +92,7 @@ export default function CourseRoadmapPath({ lessons, completedIds }: { lessons: 
         const card = (
           <div className={`${styles.card} ${styles['card_' + status]}`}>
             <span className="shine-overlay" aria-hidden="true" />
+            <CornerBulb status={status} />
             <p className={`${styles.tag} ${styles['tag_' + status]}`}>
               {String(i + 1).padStart(2, '0')} · {STATUS_TEXT[status]}
             </p>
@@ -106,7 +108,6 @@ export default function CourseRoadmapPath({ lessons, completedIds }: { lessons: 
                 <Link href={`/lessons/${lesson.id}`} className={styles.cardLink}>{card}</Link>
               )}
             </div>
-            <div className={styles.nodeCol}><Node status={status} /></div>
           </div>
         )
       })}
