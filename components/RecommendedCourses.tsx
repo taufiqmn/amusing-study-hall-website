@@ -32,6 +32,7 @@ export default function RecommendedCourses({ courses }: { courses: any[] }) {
               transition: 'transform 0.25s, box-shadow 0.25s',
             }}
           >
+            <span className="shine-overlay" aria-hidden="true" />
             <div style={{ position: 'absolute', top: -30, right: -30, width: 110, height: 110, borderRadius: '50%', background: 'radial-gradient(circle, var(--glow-color), transparent 70%)', filter: 'blur(2px)' }} />
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: 2, background: 'var(--accent-gradient)', opacity: 0.8 }} />
 

@@ -8,7 +8,17 @@ import RecommendedCourses from '@/components/RecommendedCourses'
 import Footer from '@/components/Footer'
 import Landing from '@/components/landing/Landing'
 
-export default function HomeClient({ courses }: { courses: any[] }) {
+export default function HomeClient({
+  courses,
+  stats,
+  topics,
+  lessonCounts,
+}: {
+  courses: any[]
+  stats?: { courses: number; lessons: number; quizzes: number }
+  topics?: string[]
+  lessonCounts?: Record<string, number>
+}) {
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -34,9 +44,8 @@ export default function HomeClient({ courses }: { courses: any[] }) {
     return (
       <div style={{ background: 'var(--background)', minHeight: '100vh' }}>
         <SiteHeader />
-        <Landing courseCount={courses.length} />
+        <Landing courses={courses} stats={stats} topics={topics} lessonCounts={lessonCounts} />
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 20px 32px' }}>
-          <RecommendedCourses courses={courses} />
           <Footer />
         </div>
       </div>

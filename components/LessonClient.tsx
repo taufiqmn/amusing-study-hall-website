@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import SiteHeader from '@/components/SiteHeader'
 import BlockRenderer from '@/components/BlockRenderer'
+import StoryLesson from '@/components/StoryLesson'
 import MatrixNotationContent from '@/components/lessons/MatrixNotationContent'
 import Quiz from '@/components/Quiz'
 import MatrixAdditionContent from '@/components/lessons/MatrixAdditionContent'
@@ -33,6 +34,9 @@ function getYouTubeEmbedUrl(url: string) {
   const match = (url || '').match(/(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/)
   return match ? `https://www.youtube.com/embed/${match[1]}` : null
 }
+
+const isStory = (lesson: any) =>
+  Array.isArray(lesson?.sections) && lesson.sections[0]?.type === 'story'
 
 // NEW LESSONS: store content in the `sections` jsonb column in Supabase
 // and it renders automatically via <BlockRenderer /> — no code changes needed.
@@ -198,6 +202,9 @@ export default function LessonClient({
           ← Back to course
         </button>
 
+        {isStory(lesson) ? (
+          <StoryLesson data={lesson.sections[0]} lessonId={lesson.id} />
+        ) : (
         <div
           style={{
             background: 'var(--card-bg)',
@@ -260,13 +267,16 @@ export default function LessonClient({
             />
           </div>
 
+        </div>
+        )}
+
           {!user && (
-            <p style={{ fontSize: 11, opacity: 0.6, textAlign: 'center', marginBottom: 8 }}>
+            <p style={{ fontSize: 11, opacity: 0.6, textAlign: 'center', margin: '14px 0 8px' }}>
               <a href="/signup" style={{ color: 'var(--accent)' }}>Sign up</a> to save your progress and track time spent
             </p>
           )}
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14 }}>
             <button
               onClick={goToPrev}
               disabled={!prevLesson}
@@ -301,7 +311,6 @@ export default function LessonClient({
               {marking ? 'Saving...' : nextLesson ? 'Next lesson →' : 'Finish course ✓'}
             </button>
           </div>
-        </div>
       </div>
     </div>
   )

@@ -1,32 +1,59 @@
 'use client'
 
 // Renders lesson content stored in the `lessons.sections` jsonb column.
-// From now on, new lessons need ZERO code changes — just insert a row
-// in Supabase with a `sections` array like:
-//
-// [
-//   { "type": "accordion", "title": "1. What is a loop?", "blocks": [
-//     { "type": "text", "text": "A loop repeats code..." },
-//     { "type": "code", "code": "for (int i = 0; i < 5; i++) {\n  printf(\"%d\", i);\n}" },
-//     { "type": "note", "text": "The condition is checked BEFORE every iteration." },
-//     { "type": "reveal", "question": "How many times does it print?", "answer": "5 times: i = 0,1,2,3,4" },
-//     { "type": "matrix", "data": [[1,2],[3,4]] }
-//   ]}
-// ]
+// v2: adds "interactive" (live tools), "problem" (practice with reveal
+// solution), and "link" (jump to another course/lesson) block types.
 
+import { useState } from 'react'
 import { Accordion, RevealQuestion } from '@/components/Accordion'
 import MatrixDisplay from '@/components/MatrixDisplay'
+import ArrayVisualizer from '@/components/interactive/ArrayVisualizer'
+import ComplexityLab from '@/components/interactive/ComplexityLab'
+import SortVisualizer from '@/components/interactive/SortVisualizer'
+import SearchVisualizer from '@/components/interactive/SearchVisualizer'
+import StackVisualizer from '@/components/interactive/StackVisualizer'
+import QueueVisualizer from '@/components/interactive/QueueVisualizer'
+import LinkedListVisualizer from '@/components/interactive/LinkedListVisualizer'
+import InfixPostfixLab from '@/components/interactive/InfixPostfixLab'
+import HanoiVisualizer from '@/components/interactive/HanoiVisualizer'
 
-export type ContentBlock =
-  | { type: 'heading'; text: string }
-  | { type: 'text'; text: string }
-  | { type: 'code'; code: string; language?: string }
-  | { type: 'note'; text: string }
-  | { type: 'reveal'; question: string; answer: string }
-  | { type: 'matrix'; data: number[][] }
-  | { type: 'list'; items: string[] }
-  | { type: 'image'; src: string; alt?: string }
-  | { type: 'accordion'; title: string; blocks: ContentBlock[]; open?: boolean }
+// Registry: add new tools here, then use them from lesson JSON with
+// { "type": "interactive", "name": "array-visualizer" }
+const INTERACTIVE: Record<string, React.ComponentType<any>> = {
+  'array-visualizer': ArrayVisualizer,
+  'complexity-lab': ComplexityLab,
+  'sort-visualizer': SortVisualizer,
+  'search-visualizer': SearchVisualizer,
+  'stack-visualizer': StackVisualizer,
+  'queue-visualizer': QueueVisualizer,
+  'linkedlist-visualizer': LinkedListVisualizer,
+  'infix-postfix-lab': InfixPostfixLab,
+  'hanoi-visualizer': HanoiVisualizer,
+}
+
+export type ContentBlock = { type: string; [key: string]: any }
+
+function Solution({ code, note }: { code?: string; note?: string }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div style={{ marginTop: 10 }}>
+      <button
+        onClick={() => setOpen(!open)}
+        style={{ fontSize: 12, fontWeight: 700, padding: '8px 16px', borderRadius: 8, border: '1px solid var(--card-border)', background: open ? 'var(--accent)' : 'var(--pill-bg)', color: open ? 'white' : 'var(--accent)', cursor: 'pointer' }}
+      >
+        {open ? 'Hide solution' : '💡 Reveal solution'}
+      </button>
+      {open && (
+        <div style={{ marginTop: 10 }}>
+          {code && (
+            <pre style={{ background: 'var(--background)', border: '1px solid var(--card-border)', padding: 12, borderRadius: 8, fontSize: 12.5, overflowX: 'auto', margin: '0 0 8px' }}>{code}</pre>
+          )}
+          {note && <p style={{ fontSize: 12.5, lineHeight: 1.7, margin: 0, opacity: 0.85 }}>🧠 {note}</p>}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function Block({ block }: { block: ContentBlock }) {
   switch (block.type) {
@@ -38,32 +65,12 @@ function Block({ block }: { block: ContentBlock }) {
 
     case 'code':
       return (
-        <pre
-          style={{
-            background: 'var(--background)',
-            border: '1px solid var(--card-border)',
-            padding: 12,
-            borderRadius: 8,
-            fontSize: 13,
-            overflowX: 'auto',
-            margin: '0 0 10px',
-          }}
-        >
-          {block.code}
-        </pre>
+        <pre style={{ background: 'var(--background)', border: '1px solid var(--card-border)', padding: 12, borderRadius: 8, fontSize: 13, overflowX: 'auto', margin: '0 0 10px' }}>{block.code}</pre>
       )
 
     case 'note':
       return (
-        <div
-          style={{
-            borderLeft: '3px solid var(--accent)',
-            background: 'var(--pill-bg)',
-            padding: '10px 14px',
-            borderRadius: '0 10px 10px 0',
-            margin: '0 0 10px',
-          }}
-        >
+        <div style={{ borderLeft: '3px solid var(--accent)', background: 'var(--pill-bg)', padding: '10px 14px', borderRadius: '0 10px 10px 0', margin: '0 0 10px' }}>
           <p style={{ fontSize: 12.5, lineHeight: 1.6, margin: 0 }}>💡 {block.text}</p>
         </div>
       )
@@ -81,9 +88,7 @@ function Block({ block }: { block: ContentBlock }) {
     case 'list':
       return (
         <ul style={{ fontSize: 13, lineHeight: 1.8, margin: '0 0 10px', paddingLeft: 20 }}>
-          {block.items.map((item, i) => (
-            <li key={i}>{item}</li>
-          ))}
+          {(block.items || []).map((item: string, i: number) => <li key={i}>{item}</li>)}
         </ul>
       )
 
@@ -91,12 +96,50 @@ function Block({ block }: { block: ContentBlock }) {
       // eslint-disable-next-line @next/next/no-img-element
       return <img src={block.src} alt={block.alt || ''} style={{ maxWidth: '100%', borderRadius: 10, margin: '0 0 10px' }} />
 
+    case 'link':
+      return (
+        <a href={block.href} style={{ display: 'inline-block', fontSize: 13, fontWeight: 700, padding: '10px 18px', background: 'var(--pill-bg)', border: '1px solid var(--card-border)', color: 'var(--accent)', borderRadius: 10, textDecoration: 'none', margin: '0 0 10px' }}>
+          {block.text || 'Open →'}
+        </a>
+      )
+
+    case 'interactive': {
+      const Tool = INTERACTIVE[block.name]
+      if (!Tool) return <p style={{ fontSize: 12, opacity: 0.6 }}>Tool "{block.name}" not found.</p>
+      return (
+        <div style={{ margin: '0 0 14px' }}>
+          <Tool {...(block.props || {})} />
+        </div>
+      )
+    }
+
+    case 'problem':
+      return (
+        <div style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)', borderRadius: 12, padding: '14px 16px', margin: '0 0 12px' }}>
+          <p style={{ fontSize: 13, fontWeight: 700, margin: '0 0 8px' }}>
+            {block.n != null ? `Problem ${block.n}: ` : '📝 '}{block.question}
+          </p>
+          {(block.sampleInput || block.sampleOutput) && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 4 }}>
+              <div style={{ background: 'var(--background)', borderRadius: 8, padding: 10 }}>
+                <p style={{ fontSize: 10.5, fontWeight: 800, opacity: 0.55, margin: '0 0 4px', textTransform: 'uppercase' }}>Sample input</p>
+                <pre style={{ fontSize: 12, margin: 0, whiteSpace: 'pre-wrap' }}>{block.sampleInput}</pre>
+              </div>
+              <div style={{ background: 'var(--background)', borderRadius: 8, padding: 10 }}>
+                <p style={{ fontSize: 10.5, fontWeight: 800, opacity: 0.55, margin: '0 0 4px', textTransform: 'uppercase' }}>Sample output</p>
+                <pre style={{ fontSize: 12, margin: 0, whiteSpace: 'pre-wrap' }}>{block.sampleOutput}</pre>
+              </div>
+            </div>
+          )}
+          {block.hint && <p style={{ fontSize: 12, opacity: 0.7, margin: '6px 0 0' }}>💭 Hint: {block.hint}</p>}
+          {(block.solutionCode || block.solutionNote) && <Solution code={block.solutionCode} note={block.solutionNote} />}
+        </div>
+      )
+
     case 'accordion':
       return (
         <Accordion title={block.title} defaultOpen={block.open}>
-          {block.blocks.map((b, i) => (
-            <Block key={i} block={b} />
-          ))}
+          {(block.blocks || []).map((b: ContentBlock, i: number) => <Block key={i} block={b} />)}
         </Accordion>
       )
 

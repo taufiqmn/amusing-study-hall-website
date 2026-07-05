@@ -43,6 +43,7 @@ export default function LessonCard({
         onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
         onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
       >
+        <span className="shine-overlay" aria-hidden="true" />
         <div style={{ position: 'absolute', top: 18, right: 18, width: 46, height: 46, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {status !== 'locked' && (
             <div
@@ -72,9 +73,13 @@ export default function LessonCard({
             <span style={{ position: 'absolute', fontSize: 14, zIndex: 2 }}>🔒</span>
           )}
           {status === 'completed' && (
-            <svg width={22} height={17} viewBox="0 0 100 70" style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', zIndex: 2 }}>
-              <path d="M10 26 L50 6 L90 26 L50 46 Z" fill="#1A1A2E" stroke="#F3CB4B" strokeWidth="3" />
-              <circle cx="50" cy="26" r="5" fill="#F3CB4B" />
+            <svg width={28} height={24} viewBox="0 0 100 86" style={{ position: 'absolute', top: -16, left: '50%', transform: 'translateX(-50%) rotate(-8deg)', zIndex: 2, filter: 'drop-shadow(0 2px 4px rgba(243,203,75,0.45))' }}>
+              <path d="M30 42 L30 54 Q30 66 50 66 Q70 66 70 54 L70 42 Z" fill="#1A1A2E" stroke="#F3CB4B" strokeWidth="4" strokeLinejoin="round" />
+              <path d="M6 32 L6 40 L50 60 L94 40 L94 32 L50 52 Z" fill="#0f0e22" stroke="#F3CB4B" strokeWidth="3" strokeLinejoin="round" />
+              <path d="M6 32 L50 12 L94 32 L50 52 Z" fill="#1A1A2E" stroke="#F3CB4B" strokeWidth="4" strokeLinejoin="round" />
+              <circle cx="50" cy="32" r="4.5" fill="#F3CB4B" />
+              <path d="M50 32 Q72 34 76 44 L76 60" fill="none" stroke="#F3CB4B" strokeWidth="3.5" strokeLinecap="round" />
+              <path d="M71 60 L81 60 L79 74 Q76 78 73 74 Z" fill="#F3CB4B" />
             </svg>
           )}
         </div>
