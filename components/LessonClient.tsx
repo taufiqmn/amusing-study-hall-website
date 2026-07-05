@@ -103,11 +103,51 @@ export default function LessonClient({
   const [completed, setCompleted] = useState(false)
 
   const startTimeRef = useRef<number>(Date.now())
+  const userRef = useRef<any>(null)
+  const tokenRef = useRef<string | null>(null)
+
+  // Reliable time logging: fires on navigation AND on tab close /
+  // app switch, using keepalive fetch so the browser finishes the
+  // request even after the page dies. No more lost study minutes.
+  const flushTime = () => {
+    const u = userRef.current
+    if (!u || !lesson) return
+    const seconds = Math.round((Date.now() - startTimeRef.current) / 1000)
+    if (seconds < 2) return
+    const startedAt = new Date(startTimeRef.current).toISOString()
+    startTimeRef.current = Date.now() // avoid double-counting
+    const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/activity_logs`
+    const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+    try {
+      fetch(url, {
+        method: 'POST',
+        keepalive: true,
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: anon,
+          Authorization: `Bearer ${tokenRef.current || anon}`,
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify({
+          user_id: u.id,
+          course_id: lesson.course_id,
+          lesson_id: lesson.id,
+          event_type: 'watched_lesson',
+          started_at: startedAt,
+          ended_at: new Date().toISOString(),
+          duration_seconds: seconds,
+        }),
+      }).catch(() => {})
+    } catch {}
+  }
 
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
+      userRef.current = user
+      const { data: { session } } = await supabase.auth.getSession()
+      tokenRef.current = session?.access_token || null
 
       if (user && lesson) {
         const { data: progressData } = await supabase
@@ -124,27 +164,17 @@ export default function LessonClient({
     }
     load()
 
+    const onHide = () => { if (document.visibilityState === 'hidden') flushTime() }
+    window.addEventListener('pagehide', flushTime)
+    document.addEventListener('visibilitychange', onHide)
+
     return () => {
-      logTimeSpent()
+      flushTime()
+      window.removeEventListener('pagehide', flushTime)
+      document.removeEventListener('visibilitychange', onHide)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson?.id])
-
-  const logTimeSpent = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user || !lesson) return
-    const seconds = Math.round((Date.now() - startTimeRef.current) / 1000)
-    if (seconds < 2) return
-    await supabase.from('activity_logs').insert({
-      user_id: user.id,
-      course_id: lesson.course_id,
-      lesson_id: lesson.id,
-      event_type: 'watched_lesson',
-      started_at: new Date(startTimeRef.current).toISOString(),
-      ended_at: new Date().toISOString(),
-      duration_seconds: seconds,
-    })
-  }
 
   const markComplete = async () => {
     if (!user) {
@@ -171,13 +201,13 @@ export default function LessonClient({
   const goToNext = async () => {
     const ok = await markComplete()
     if (!ok) return
-    await logTimeSpent()
+    flushTime()
     if (nextLesson) router.push(`/lessons/${nextLesson.id}`)
     else router.push(`/courses/${lesson.course_id}`)
   }
 
   const goToPrev = async () => {
-    await logTimeSpent()
+    flushTime()
     if (prevLesson) router.push(`/lessons/${prevLesson.id}`)
   }
 
