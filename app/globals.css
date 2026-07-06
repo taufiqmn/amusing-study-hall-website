@@ -71,17 +71,12 @@ body {
 .shine-card::after {
   content: "";
   position: absolute;
-  top: -80%;
-  left: -100%;
-  width: 60%;
-  height: 260%;
-  transform: rotate(22deg) translateX(0);
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--shine),
-    transparent
-  );
+  top: -150%;
+  left: -150%;
+  width: 120%;
+  height: 400%;
+  transform: rotate(20deg) translateX(0);
+  background: linear-gradient(90deg, transparent 20%, var(--shine) 50%, transparent 80%);
   opacity: 0;
   pointer-events: none;
   animation: shineSweep 7s ease-in-out infinite;
@@ -92,15 +87,15 @@ body {
 }
 
 @keyframes shineSweep {
-  0%, 78% { transform: rotate(25deg) translateX(-40%); opacity: 0; }
-  84% { opacity: 0.9; }
-  92%, 100% { transform: rotate(25deg) translateX(420%); opacity: 0; }
+  0%, 82% { transform: rotate(20deg) translateX(-120%); opacity: 0; }
+  86% { opacity: 1; }
+  99%, 100% { transform: rotate(20deg) translateX(320%); opacity: 0; }
 }
 
 @keyframes shineSweepFast {
-  0% { transform: rotate(25deg) translateX(-40%); opacity: 0; }
-  25% { opacity: 1; }
-  100% { transform: rotate(25deg) translateX(420%); opacity: 0; }
+  0% { transform: rotate(20deg) translateX(-120%); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: rotate(20deg) translateX(320%); opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -119,12 +114,12 @@ body {
 .shine-overlay::after {
   content: "";
   position: absolute;
-  top: -80%;
-  left: -100%;
-  width: 60%;
-  height: 260%;
-  transform: rotate(22deg) translateX(-40%);
-  background: linear-gradient(90deg, transparent, var(--shine), transparent);
+  top: -150%;
+  left: -150%;
+  width: 120%;
+  height: 400%;
+  transform: rotate(20deg) translateX(0);
+  background: linear-gradient(90deg, transparent 20%, var(--shine) 50%, transparent 80%);
   opacity: 0;
   animation: shineSweep 7s ease-in-out infinite;
 }
