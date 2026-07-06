@@ -1,0 +1,103 @@
+.wrap {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+.sizeLabel { font-size: 12.5px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.sizeInput {
+  width: 60px; font-size: 13px; padding: 7px 10px; border-radius: 8px;
+  border: 1.5px solid var(--card-border); background: var(--background); color: var(--foreground);
+}
+.buildBtn {
+  font-size: 12.5px; font-weight: 800; padding: 8px 16px; border-radius: 9px; border: none;
+  background: var(--accent-gradient); color: white; cursor: pointer;
+}
+.buildBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.stage { display: flex; gap: 16px; flex-wrap: wrap; }
+.visualCol { flex: 1; min-width: 190px; position: relative; padding-top: 60px; }
+.codeCol { flex: 1.3; min-width: 240px; }
+
+/* hand */
+.hand {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 30px;
+  text-align: center;
+  transition: transform 0.06s linear, opacity 0.3s;
+  z-index: 3;
+}
+.handPlate {
+  width: 60px; height: 26px; margin: -6px auto 0;
+  background: var(--gold, #f3cb4b); color: #402a02;
+  border-radius: 6px; font-size: 13px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* container + slots */
+.container {
+  display: flex; flex-direction: column; justify-content: flex-start;
+  border: 2px solid var(--card-border); border-top: none;
+  border-radius: 0 0 12px 12px; padding: 7px; gap: 4px;
+  background: var(--background);
+}
+.slotRow { display: flex; align-items: center; gap: 8px; }
+.slot {
+  flex: 1; height: 40px; border-radius: 8px;
+  border: 1.5px dashed var(--card-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 800; color: var(--foreground);
+  transition: all 0.3s;
+}
+.filled { border: none; background: var(--accent-gradient); color: white; box-shadow: 0 3px 10px var(--glow-color); }
+.topSlot { outline: 2px solid var(--gold, #f3cb4b); outline-offset: 2px; }
+.peekSlot { background: var(--gold, #f3cb4b) !important; color: #402a02 !important; transform: scale(1.05); }
+.ghostSlot {
+  border: 1.5px dashed #e25c5c; background: rgba(226, 92, 92, 0.08);
+  color: #e25c5c; opacity: 0.6; font-style: italic;
+}
+.idxLabel { font-size: 10.5px; opacity: 0.6; font-weight: 700; white-space: nowrap; min-width: 30px; }
+.topPtr { color: var(--gold, #f3cb4b); font-size: 10.5px; }
+
+/* code panel */
+.codeHead {
+  font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--accent-2, var(--accent)); margin-bottom: 6px;
+}
+.code {
+  background: var(--background); border: 1px solid var(--card-border); border-radius: 10px;
+  padding: 10px; font-size: 11.5px; line-height: 1.5; font-family: monospace;
+  overflow-x: auto; margin: 0; min-height: 140px;
+}
+.codeDim { opacity: 0.4; }
+.codeLine { padding: 1px 6px; border-radius: 4px; white-space: pre; }
+.codeActive { background: rgba(243, 203, 75, 0.2); border-left: 3px solid var(--gold, #f3cb4b); margin-left: -6px; padding-left: 9px; }
+
+/* op controls */
+.opRow { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+.valInput {
+  width: 66px; font-size: 13px; padding: 8px 10px; border-radius: 8px;
+  border: 1.5px solid var(--card-border); background: var(--background); color: var(--foreground);
+}
+.opBtn { font-size: 12.5px; font-weight: 800; padding: 8px 16px; border-radius: 9px; border: none; color: white; cursor: pointer; }
+.opBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.pushBtn { background: #4FC3A1; }
+.popBtn { background: #e25c5c; }
+.peekBtn { background: var(--gold, #f3cb4b); color: #402a02; }
+
+.msg {
+  margin-top: 12px; background: var(--background); border: 1px solid var(--card-border);
+  border-radius: 10px; padding: 11px 14px; font-size: 12.5px; line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+  .stage { flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hand { transition: opacity 0.2s; }
+}

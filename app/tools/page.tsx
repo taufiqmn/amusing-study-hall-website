@@ -8,6 +8,7 @@ import ComplexityLab from '@/components/interactive/ComplexityLab'
 import SortVisualizer from '@/components/interactive/SortVisualizer'
 import SearchVisualizer from '@/components/interactive/SearchVisualizer'
 import StackVisualizer from '@/components/interactive/StackVisualizer'
+import StackPlayground from '@/components/interactive/StackPlayground'
 import QueueVisualizer from '@/components/interactive/QueueVisualizer'
 import LinkedListVisualizer from '@/components/interactive/LinkedListVisualizer'
 import InfixPostfixLab from '@/components/interactive/InfixPostfixLab'
@@ -18,6 +19,7 @@ const TOOLS = [
   { emoji: '⏱', title: 'Complexity Lab', desc: 'Paste any code and get an estimated Big-O with reasons and a growth table.', C: ComplexityLab },
   { emoji: '📊', title: 'Sorting Visualizer', desc: 'Bubble, Selection and Insertion sort — animated bars with compare & swap counters.', C: SortVisualizer },
   { emoji: '🔍', title: 'Search Race', desc: 'Linear vs Binary search on the same data. Watch BEG, MID, END do their thing.', C: SearchVisualizer },
+  { emoji: '🥞', title: 'Stack Playground', desc: 'Build a stack of your OWN size and watch a hand drop plates as code runs line by line.', C: StackPlayground },
   { emoji: '🥞', title: 'Stack Machine', desc: 'Push, pop and peek — and trigger real overflow & underflow errors safely.', C: StackVisualizer },
   { emoji: '🚶', title: 'Queue Simulator', desc: 'Linear vs Circular queue with FRONT/REAR pointers. See why circular exists.', C: QueueVisualizer },
   { emoji: '🔗', title: 'Linked List Lab', desc: 'Nodes and pointers you can actually see. Insert in O(1), search by walking the chain.', C: LinkedListVisualizer },

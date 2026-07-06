@@ -19,6 +19,7 @@ import ComplexityLab from '@/components/interactive/ComplexityLab'
 import SortVisualizer from '@/components/interactive/SortVisualizer'
 import SearchVisualizer from '@/components/interactive/SearchVisualizer'
 import StackVisualizer from '@/components/interactive/StackVisualizer'
+import StackPlayground from '@/components/interactive/StackPlayground'
 import QueueVisualizer from '@/components/interactive/QueueVisualizer'
 import LinkedListVisualizer from '@/components/interactive/LinkedListVisualizer'
 import InfixPostfixLab from '@/components/interactive/InfixPostfixLab'
@@ -31,6 +32,7 @@ const INTERACTIVE: Record<string, React.ComponentType<any>> = {
   'sort-visualizer': SortVisualizer,
   'search-visualizer': SearchVisualizer,
   'stack-visualizer': StackVisualizer,
+  'stack-playground': StackPlayground,
   'queue-visualizer': QueueVisualizer,
   'linkedlist-visualizer': LinkedListVisualizer,
   'infix-postfix-lab': InfixPostfixLab,
