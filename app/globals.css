@@ -15,9 +15,9 @@
   --accent-2: #0891b2;
   --accent-gradient: linear-gradient(135deg, #6d28d9, #0891b2);
   --gold: #d97706;
-  --card-bg: rgba(255, 253, 248, 0.82);
-  --card-border: rgba(109, 40, 217, 0.14);
-  --card-shadow: 0 8px 32px rgba(109, 40, 217, 0.08);
+  --card-bg: #ffffff;
+  --card-border: rgba(109, 40, 217, 0.18);
+  --card-shadow: 0 8px 30px rgba(109, 40, 217, 0.13);
   --glow-color: rgba(217, 119, 6, 0.18);
   --pill-bg: rgba(109, 40, 217, 0.08);
   --shine: rgba(255, 255, 255, 0.85);
@@ -71,11 +71,11 @@ body {
 .shine-card::after {
   content: "";
   position: absolute;
-  top: -60%;
-  left: -80%;
-  width: 50%;
-  height: 220%;
-  transform: rotate(25deg) translateX(0);
+  top: -80%;
+  left: -100%;
+  width: 60%;
+  height: 260%;
+  transform: rotate(22deg) translateX(0);
   background: linear-gradient(
     90deg,
     transparent,
@@ -119,11 +119,11 @@ body {
 .shine-overlay::after {
   content: "";
   position: absolute;
-  top: -60%;
-  left: -80%;
-  width: 50%;
-  height: 220%;
-  transform: rotate(25deg) translateX(-40%);
+  top: -80%;
+  left: -100%;
+  width: 60%;
+  height: 260%;
+  transform: rotate(22deg) translateX(-40%);
   background: linear-gradient(90deg, transparent, var(--shine), transparent);
   opacity: 0;
   animation: shineSweep 7s ease-in-out infinite;

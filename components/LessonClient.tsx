@@ -213,6 +213,28 @@ export default function LessonClient({
 
   if (!lesson) return <p style={{ padding: 20 }}>Lesson not found.</p>
 
+  const [aheadWarn, setAheadWarn] = useState(false)
+  useEffect(() => {
+    const check = async () => {
+      if (!lesson) return
+      const idx = siblings.findIndex((l) => l.id === lesson.id)
+      if (idx <= 0) return
+      const { data: { user } } = await supabase.auth.getUser()
+      const priorIds = siblings.slice(0, idx).map((l) => l.id)
+      if (!user) { setAheadWarn(true); return }
+      const { data } = await supabase
+        .from('progress')
+        .select('lesson_id')
+        .eq('user_id', user.id)
+        .eq('status', 'completed')
+        .in('lesson_id', priorIds)
+      const doneCount = (data || []).length
+      setAheadWarn(doneCount < priorIds.length)
+    }
+    check()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lesson?.id])
+
   const currentIndex = siblings.findIndex((l) => l.id === lesson.id)
   const prevLesson = currentIndex > 0 ? siblings[currentIndex - 1] : null
   const nextLesson = currentIndex < siblings.length - 1 ? siblings[currentIndex + 1] : null
@@ -244,6 +266,15 @@ export default function LessonClient({
           }}
         >
           <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 18 }}>{lesson.title}</h1>
+          {aheadWarn && (
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', background: 'rgba(243,203,75,0.12)', border: '1px solid rgba(243,203,75,0.5)', borderRadius: 12, padding: '12px 14px', marginBottom: 18 }}>
+              <span style={{ fontSize: 18 }}>💡</span>
+              <p style={{ fontSize: 12.5, lineHeight: 1.6, margin: 0 }}>
+                <b>Heads up — you&apos;re jumping ahead.</b> You haven&apos;t finished the earlier lessons in this course.
+                That&apos;s totally fine, but this topic may build on ideas explained before it, so some parts might feel harder to follow.
+              </p>
+            </div>
+          )}
 
           {embedUrl ? (
             <div style={{ position: 'relative', paddingBottom: '56.25%', marginBottom: 20, borderRadius: 14, overflow: 'hidden' }}>

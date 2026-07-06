@@ -46,7 +46,7 @@ export default function CompilerPage() {
     setStatus('running')
     setOutput('')
     try {
-      const res = await fetch('https://emkc.org/api/v2/piston/execute', {
+      const res = await fetch('/api/run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

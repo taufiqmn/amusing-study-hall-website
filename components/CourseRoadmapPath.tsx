@@ -104,9 +104,7 @@ export default function CourseRoadmapPath({ lessons, completedIds }: { lessons: 
         return (
           <div key={lesson.id} className={styles.row}>
             <div className={`${styles.slot} ${right ? styles.slotRight : styles.slotLeft}`}>
-              {status === 'locked' ? card : (
-                <Link href={`/lessons/${lesson.id}`} className={styles.cardLink}>{card}</Link>
-              )}
+              <Link href={`/lessons/${lesson.id}`} className={styles.cardLink}>{card}</Link>
             </div>
           </div>
         )
