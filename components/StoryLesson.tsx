@@ -20,6 +20,9 @@ import SortVisualizer from '@/components/interactive/SortVisualizer'
 import SearchVisualizer from '@/components/interactive/SearchVisualizer'
 import StackVisualizer from '@/components/interactive/StackVisualizer'
 import StackPlayground from '@/components/interactive/StackPlayground'
+import StackOpDemo from '@/components/interactive/StackOpDemo'
+import CircularQueueLab from '@/components/interactive/CircularQueueLab'
+import CodeTryBox from '@/components/CodeTryBox'
 import QueueVisualizer from '@/components/interactive/QueueVisualizer'
 import LinkedListVisualizer from '@/components/interactive/LinkedListVisualizer'
 import InfixPostfixLab from '@/components/interactive/InfixPostfixLab'
@@ -33,6 +36,8 @@ const INTERACTIVE: Record<string, React.ComponentType<any>> = {
   'search-visualizer': SearchVisualizer,
   'stack-visualizer': StackVisualizer,
   'stack-playground': StackPlayground,
+  'stack-op-demo': StackOpDemo,
+  'circular-queue-lab': CircularQueueLab,
   'queue-visualizer': QueueVisualizer,
   'linkedlist-visualizer': LinkedListVisualizer,
   'infix-postfix-lab': InfixPostfixLab,
@@ -175,14 +180,24 @@ function LongQuestions({ items }: { items: any[] }) {
             <span className={styles.longDiff} style={{ background: diffColor[lq.difficulty] || 'var(--accent)' }}>{lq.difficulty}</span>
             <p className={styles.longQ}><Rich text={lq.q} /></p>
           </div>
+          {lq.tryCode !== false && (
+            <CodeTryBox
+              starter={lq.starter || ''}
+              stdin={lq.stdin || ''}
+              expected={lq.expected}
+            />
+          )}
           <button className={styles.revealBtn} onClick={() => setOpen(open === i ? null : i)}>
             {open === i ? 'Hide solution' : '💡 Reveal step-by-step solution'}
           </button>
           {open === i && (
             <div className={styles.longSolution}>
-              {(lq.steps || []).map((s: string, j: number) => (
-                <p key={j} className={styles.longStep}><b>Step {j + 1}.</b> <Rich text={s} /></p>
+              {(lq.steps || []).map((st: string, j: number) => (
+                <p key={j} className={styles.longStep}><b>Step {j + 1}.</b> <Rich text={st} /></p>
               ))}
+              {lq.solutionCode && (
+                <pre style={{ background: 'var(--background)', border: '1px solid var(--card-border)', borderLeft: '3px solid var(--accent)', padding: 12, borderRadius: 8, fontSize: 12.5, overflowX: 'auto', margin: '8px 0' }}>{lq.solutionCode}</pre>
+              )}
               {lq.answer && <p className={styles.longAnswer}>✅ <Rich text={lq.answer} /></p>}
             </div>
           )}
