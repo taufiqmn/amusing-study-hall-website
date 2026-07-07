@@ -20,6 +20,10 @@ import SortVisualizer from '@/components/interactive/SortVisualizer'
 import SearchVisualizer from '@/components/interactive/SearchVisualizer'
 import StackVisualizer from '@/components/interactive/StackVisualizer'
 import StackPlayground from '@/components/interactive/StackPlayground'
+import CircularQueueRing from '@/components/interactive/CircularQueueRing'
+import QueueTicketAnim from '@/components/interactive/QueueTicketAnim'
+import InfixConvertLab from '@/components/interactive/InfixConvertLab'
+import StackAutoPlay from '@/components/interactive/StackAutoPlay'
 import StackOpDemo from '@/components/interactive/StackOpDemo'
 import CircularQueueLab from '@/components/interactive/CircularQueueLab'
 import CodeTryBox from '@/components/CodeTryBox'
@@ -36,6 +40,10 @@ const INTERACTIVE: Record<string, React.ComponentType<any>> = {
   'search-visualizer': SearchVisualizer,
   'stack-visualizer': StackVisualizer,
   'stack-playground': StackPlayground,
+  'circular-queue-ring': CircularQueueRing,
+  'queue-ticket-anim': QueueTicketAnim,
+  'infix-convert-lab': InfixConvertLab,
+  'stack-autoplay': StackAutoPlay,
   'stack-op-demo': StackOpDemo,
   'circular-queue-lab': CircularQueueLab,
   'queue-visualizer': QueueVisualizer,

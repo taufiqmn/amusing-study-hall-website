@@ -18,7 +18,7 @@ const CODE = {
     '        return;',
     '    }',
     '    *top = *top + 1;              // move top up',
-    '    stack[*top] = x;              // place the plate',
+    '    stack[*top] = x;              // place value x here',
     '}',
   ],
   pop: [
@@ -152,7 +152,14 @@ export default function StackPlayground({ defaultSize = 5 }: { defaultSize?: num
     })
 
   const slotHeight = 46
-  const codeLines = op ? CODE[op] : []
+  let codeLines = op ? CODE[op] : []
+  if (op === 'push') {
+    // show the ACTUAL value the user typed, e.g. push(..., 25) and stack[*top] = 25
+    codeLines = codeLines.map((l) =>
+      l.includes('int x)') ? l.replace('int x)', `int x)   // called as push(.., ${input})`) :
+      l.includes('= x;') ? l.replace('= x;', `= ${input};`) : l
+    )
+  }
 
   return (
     <div className={styles.wrap}>

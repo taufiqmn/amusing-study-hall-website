@@ -13,6 +13,10 @@ import SortVisualizer from '@/components/interactive/SortVisualizer'
 import SearchVisualizer from '@/components/interactive/SearchVisualizer'
 import StackVisualizer from '@/components/interactive/StackVisualizer'
 import StackPlayground from '@/components/interactive/StackPlayground'
+import CircularQueueRing from '@/components/interactive/CircularQueueRing'
+import QueueTicketAnim from '@/components/interactive/QueueTicketAnim'
+import InfixConvertLab from '@/components/interactive/InfixConvertLab'
+import StackAutoPlay from '@/components/interactive/StackAutoPlay'
 import QueueVisualizer from '@/components/interactive/QueueVisualizer'
 import LinkedListVisualizer from '@/components/interactive/LinkedListVisualizer'
 import InfixPostfixLab from '@/components/interactive/InfixPostfixLab'
@@ -27,6 +31,10 @@ const INTERACTIVE: Record<string, React.ComponentType<any>> = {
   'search-visualizer': SearchVisualizer,
   'stack-visualizer': StackVisualizer,
   'stack-playground': StackPlayground,
+  'circular-queue-ring': CircularQueueRing,
+  'queue-ticket-anim': QueueTicketAnim,
+  'infix-convert-lab': InfixConvertLab,
+  'stack-autoplay': StackAutoPlay,
   'queue-visualizer': QueueVisualizer,
   'linkedlist-visualizer': LinkedListVisualizer,
   'infix-postfix-lab': InfixPostfixLab,
