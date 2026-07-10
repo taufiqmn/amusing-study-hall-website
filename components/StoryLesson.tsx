@@ -61,6 +61,24 @@ const INTERACTIVE: Record<string, React.ComponentType<any>> = {
 const CASE_COLORS: Record<string, string> = { teal: '#4FC3A1', coral: '#e25c5c', gold: '#F3CB4B', accent: 'var(--accent)' }
 
 // Mini markup: **gold highlight** __teal highlight__ `code chip`
+
+// Accepts any YouTube URL form and returns a privacy-friendly embed URL.
+//   youtu.be/ID · watch?v=ID · /embed/ID · /shorts/ID · already-an-embed
+function ytEmbed(url: string): string | null {
+  if (!url) return null
+  const patterns = [
+    /(?:youtube\.com\/watch\?(?:.*&)?v=)([\w-]{6,})/,
+    /(?:youtu\.be\/)([\w-]{6,})/,
+    /(?:youtube(?:-nocookie)?\.com\/embed\/)([\w-]{6,})/,
+    /(?:youtube\.com\/shorts\/)([\w-]{6,})/,
+  ]
+  for (const re of patterns) {
+    const m = url.match(re)
+    if (m) return `https://www.youtube-nocookie.com/embed/${m[1]}?rel=0&modestbranding=1`
+  }
+  return null   // not a YouTube URL: caller falls back to a plain link
+}
+
 function Rich({ text }: { text: string }) {
   const parts = text.split(/(\*\*[^*]+\*\*|__[^_]+__|`[^`]+`)/g)
   return (
@@ -126,8 +144,14 @@ function ChapterBlock({ block }: { block: any }) {
   switch (block.b) {
     case 'p':
       return <p className={styles.p}><Rich text={block.text} /></p>
-    case 'eq':
-      return <div className={styles.eq}>{block.text}</div>
+    case 'eq': {
+      // Single-line: centered math (matrix lessons).
+      // Multi-line: preserve whitespace, left-align (ASCII tables, diagrams).
+      const multiline = typeof block.text === 'string' && block.text.includes('\n')
+      return multiline
+        ? <pre className={styles.eqBlock}>{block.text}</pre>
+        : <div className={styles.eq}>{block.text}</div>
+    }
     case 'code':
       return (
         <div>
@@ -159,6 +183,29 @@ function ChapterBlock({ block }: { block: any }) {
           {block.items.map((it: string, i: number) => <li key={i}><Rich text={it} /></li>)}
         </ul>
       )
+    case 'video': {
+      const src = ytEmbed(block.url)
+      if (!src) {
+        return block.url
+          ? <p className={styles.p}><a href={block.url} target="_blank" rel="noopener noreferrer">▶ Watch the video</a></p>
+          : null
+      }
+      return (
+        <div className={styles.videoWrap}>
+          {block.title && <p className={styles.videoTitle}>🎬 <Rich text={block.title} /></p>}
+          <div className={styles.videoFrame}>
+            <iframe
+              src={src}
+              title={block.title || 'Lesson video'}
+              loading="lazy"
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+          {block.caption && <p className={styles.videoCaption}><Rich text={block.caption} /></p>}
+        </div>
+      )
+    }
     case 'note':
       return <div className={styles.note}>💡 <Rich text={block.text} /></div>
     case 'cases':
