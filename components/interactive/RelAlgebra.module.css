@@ -1,0 +1,29 @@
+.wrap {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 14px;
+}
+.row { padding: 12px 0; border-bottom: 1px dashed var(--card-border); }
+.row:last-child { border-bottom: none; }
+.label {
+  font-size: 11.5px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--accent-2, var(--accent)); margin: 0 0 8px;
+}
+.pair { display: flex; gap: 12px; flex-wrap: wrap; }
+.side { flex: 1; min-width: 220px; }
+.sideHead { font-size: 10.5px; font-weight: 800; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 5px; }
+.ra {
+  font-family: monospace; font-size: 15px; font-weight: 700; line-height: 1.9;
+  background: var(--background); border-left: 3px solid var(--accent);
+  padding: 11px 14px; border-radius: 0 8px 8px 0; overflow-x: auto;
+}
+.sub { font-size: 10.5px; opacity: 0.9; }
+.sql {
+  font-family: monospace; font-size: 12.5px; line-height: 1.6; margin: 0;
+  background: var(--background); border: 1px solid var(--card-border);
+  padding: 11px 13px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap;
+}
+.plain { font-size: 12.5px; line-height: 1.7; opacity: 0.8; margin: 9px 0 0; font-style: italic; }
+.caption { font-size: 11.5px; opacity: 0.55; margin: 12px 0 0; line-height: 1.6; }
+@media (max-width: 640px) { .pair { flex-direction: column; } }

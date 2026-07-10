@@ -14,6 +14,8 @@ import CircularQueueRing from '@/components/interactive/CircularQueueRing'
 import QueueVisualizer from '@/components/interactive/QueueVisualizer'
 import LinkedListVisualizer from '@/components/interactive/LinkedListVisualizer'
 import InfixPostfixLab from '@/components/interactive/InfixPostfixLab'
+import SqlPlayground from '@/components/interactive/SqlPlayground'
+import QueryTracer from '@/components/interactive/QueryTracer'
 import HanoiVisualizer from '@/components/interactive/HanoiVisualizer'
 
 const TOOLS = [
@@ -29,6 +31,8 @@ const TOOLS = [
   { emoji: '🔗', title: 'Linked List Lab', desc: 'Nodes and pointers you can actually see. Insert in O(1), search by walking the chain.', C: LinkedListVisualizer },
   { emoji: '🧮', title: 'Infix ⇄ Postfix Machine', desc: 'Type any expression, step through the stack algorithm — the exam classic.', C: InfixPostfixLab },
   { emoji: '🗼', title: 'Tower of Hanoi', desc: 'Watch recursion solve the puzzle in exactly 2ⁿ − 1 moves.', C: HanoiVisualizer },
+  { emoji: '🗄️', title: 'SQL Playground', desc: 'Write real Oracle SQL and run it live. Click any table to see its columns and types.', C: SqlPlayground },
+  { emoji: '🔍', title: 'Query Tracer', desc: 'See the order SQL ACTUALLY runs in — watch rows drop, multiply and collapse at each clause.', C: QueryTracer },
 ]
 
 export default function ToolsPage() {
