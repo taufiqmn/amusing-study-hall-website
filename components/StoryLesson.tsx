@@ -24,6 +24,8 @@ import StackVisualizer from '@/components/interactive/StackVisualizer'
 import StackPlayground from '@/components/interactive/StackPlayground'
 import SqlPlayground from '@/components/interactive/SqlPlayground'
 import SqlChallenge from '@/components/interactive/SqlChallenge'
+import GaussianSolver from '@/components/interactive/GaussianSolver'
+import GaussianChallenge from '@/components/interactive/GaussianChallenge'
 import RelAlgebra from '@/components/interactive/RelAlgebra'
 import QueryTracer from '@/components/interactive/QueryTracer'
 import CircularQueueRing from '@/components/interactive/CircularQueueRing'
@@ -48,6 +50,7 @@ const INTERACTIVE: Record<string, React.ComponentType<any>> = {
   'stack-playground': StackPlayground,
   'sql-playground': SqlPlayground,
   'sql-challenge': SqlChallenge,
+  'gaussian-solver': GaussianSolver,
   'rel-algebra': RelAlgebra,
   'query-tracer': QueryTracer,
   'circular-queue-ring': CircularQueueRing,
@@ -303,13 +306,28 @@ function LongQuestions({ items }: { items: any[] }) {
             <span className={styles.longDiff} style={{ background: diffColor[lq.difficulty] || 'var(--accent)' }}>{lq.difficulty}</span>
             <p className={styles.longQ}><Rich text={lq.q} /></p>
           </div>
-          {lq.tryCode !== false && (
+          {lq.mode === 'matrix' ? (
+            <GaussianChallenge
+              expected={lq.matrixExpected}
+              answerType={lq.answerType || 'unique'}
+              solutionMatrix={lq.solutionMatrix}
+            />
+          ) : lq.mode === 'sql' ? (
+            <SqlChallenge
+              id={lq.id || `lq-${i}`}
+              seed={lq.seed || ''}
+              task=""
+              expected={lq.expected || ''}
+              starter={lq.starter || ''}
+              solution={lq.solutionCode || ''}
+            />
+          ) : lq.tryCode === true ? (
             <CodeTryBox
               starter={lq.starter || ''}
               stdin={lq.stdin || ''}
               expected={lq.expected}
             />
-          )}
+          ) : null}
           <button className={styles.revealBtn} onClick={() => setOpen(open === i ? null : i)}>
             {open === i ? 'Hide solution' : '💡 Reveal step-by-step solution'}
           </button>
