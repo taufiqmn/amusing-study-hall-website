@@ -1,5 +1,7 @@
 'use client'
 
+import React from 'react'
+
 // ============================================================
 // StoryLesson — presentation-style lesson engine.
 // Matches the SystemOfEquations chalkboard style:
@@ -61,6 +63,17 @@ const INTERACTIVE: Record<string, React.ComponentType<any>> = {
 const CASE_COLORS: Record<string, string> = { teal: '#4FC3A1', coral: '#e25c5c', gold: '#F3CB4B', accent: 'var(--accent)' }
 
 // Mini markup: **gold highlight** __teal highlight__ `code chip`
+
+// ---- Bengali toggle ----
+// Class notes only. Every text field may carry a `bn` twin:
+//    {"b":"p","text":"English…","bn":"বাংলা…"}
+// Missing bn -> falls back to English, so migration can be lesson-by-lesson.
+const LangCtx = React.createContext<'en' | 'bn'>('en')
+
+function useT() {
+  const lang = React.useContext(LangCtx)
+  return (en?: string, bn?: string) => (lang === 'bn' && bn ? bn : en)
+}
 
 // Accepts any YouTube URL form and returns a privacy-friendly embed URL.
 //   youtu.be/ID · watch?v=ID · /embed/ID · /shorts/ID · already-an-embed
@@ -141,28 +154,30 @@ function CasesExplorer({ items }: { items: { label: string; content: string; ver
 }
 
 function ChapterBlock({ block }: { block: any }) {
+  const t = useT()
   switch (block.b) {
     case 'p':
-      return <p className={styles.p}><Rich text={block.text} /></p>
+      return <p className={styles.p}><Rich text={t(block.text, block.bn)!} /></p>
     case 'eq': {
       // Single-line: centered math (matrix lessons).
       // Multi-line: preserve whitespace, left-align (ASCII tables, diagrams).
-      const multiline = typeof block.text === 'string' && block.text.includes('\n')
+      const eqText = t(block.text, block.bn)!
+      const multiline = typeof eqText === 'string' && eqText.includes('\n')
       return multiline
-        ? <pre className={styles.eqBlock}>{block.text}</pre>
-        : <div className={styles.eq}>{block.text}</div>
+        ? <pre className={styles.eqBlock}>{eqText}</pre>
+        : <div className={styles.eq}>{eqText}</div>
     }
     case 'code':
       return (
         <div>
           <pre className={styles.code}>{block.code}</pre>
-          {block.caption && <p className={styles.caption}><Rich text={block.caption} /></p>}
+          {block.caption && <p className={styles.caption}><Rich text={t(block.caption, block.captionBn)!} /></p>}
         </div>
       )
     case 'think':
       return (
         <div className={styles.think}>
-          <span className={styles.who}>{block.who || 'Now think —'}</span> <Rich text={block.text} />
+          <span className={styles.who}>{block.who || 'Now think —'}</span> <Rich text={t(block.text, block.bn)!} />
         </div>
       )
     case 'cards':
@@ -177,12 +192,15 @@ function ChapterBlock({ block }: { block: any }) {
           ))}
         </div>
       )
-    case 'list':
+    case 'list': {
+      const bnActive = t('en','bn') === 'bn'
+      const items = bnActive && block.itemsBn?.length ? block.itemsBn : block.items
       return (
         <ul className={styles.list}>
-          {block.items.map((it: string, i: number) => <li key={i}><Rich text={it} /></li>)}
+          {items.map((it: string, i: number) => <li key={i}><Rich text={it} /></li>)}
         </ul>
       )
+    }
     case 'video': {
       const src = ytEmbed(block.url)
       if (!src) {
@@ -207,7 +225,7 @@ function ChapterBlock({ block }: { block: any }) {
       )
     }
     case 'note':
-      return <div className={styles.note}>💡 <Rich text={block.text} /></div>
+      return <div className={styles.note}>💡 <Rich text={t(block.text, block.bn)!} /></div>
     case 'cases':
       return <CasesExplorer items={block.items} />
     case 'check':
@@ -269,6 +287,7 @@ function LongQuestions({ items }: { items: any[] }) {
 }
 
 export default function StoryLesson({ data, lessonId }: { data: any; lessonId: string }) {
+  const [lang, setLang] = useState<'en' | 'bn'>('en')
   const [tab, setTab] = useState<'notes' | 'quiz' | 'long'>('notes')
 
   const TabBar = () => (
@@ -280,10 +299,20 @@ export default function StoryLesson({ data, lessonId }: { data: any; lessonId: s
   )
 
   return (
+    <LangCtx.Provider value={lang}>
     <div className={styles.wrap}>
       <div className={styles.hero}>
-        {data.hero?.eyebrow && <div className={styles.eyebrow}>{data.hero.eyebrow}</div>}
-        <h1 className={styles.title}>{data.hero?.title}</h1>
+        <div className={styles.heroTop}>
+          {data.hero?.eyebrow && <div className={styles.eyebrow}>{data.hero.eyebrow}</div>}
+          <button
+            className={styles.langBtn}
+            onClick={() => setLang(l => (l === 'en' ? 'bn' : 'en'))}
+            title="Switch class-note language"
+          >
+            {lang === 'en' ? '🇧🇩 বাংলা' : '🇬🇧 English'}
+          </button>
+        </div>
+        <h1 className={styles.title}>{lang === 'bn' && data.hero?.titleBn ? data.hero.titleBn : data.hero?.title}</h1>
         {data.hero?.sub && <p className={styles.sub}><Rich text={data.hero.sub} /></p>}
         <div className={styles.rule} />
       </div>
@@ -295,8 +324,8 @@ export default function StoryLesson({ data, lessonId }: { data: any; lessonId: s
           {(data.chapters || []).map((ch: any, i: number) => (
             <div key={i}>
               <section className={styles.section}>
-                <span className={styles.tag}>{ch.tag}</span>
-                <h2 className={styles.h2}><Rich text={ch.title} /></h2>
+                <span className={styles.tag}>{lang === 'bn' && ch.tagBn ? ch.tagBn : ch.tag}</span>
+                <h2 className={styles.h2}><Rich text={lang === 'bn' && ch.titleBn ? ch.titleBn : ch.title} /></h2>
                 {(ch.blocks || []).map((b: any, j: number) => <ChapterBlock key={j} block={b} />)}
               </section>
               {i < data.chapters.length - 1 && <div className={styles.dots}>• • •</div>}
@@ -315,5 +344,6 @@ export default function StoryLesson({ data, lessonId }: { data: any; lessonId: s
 
       <TabBar />
     </div>
+    </LangCtx.Provider>
   )
 }

@@ -13,9 +13,7 @@ import SortVisualizer from '@/components/interactive/SortVisualizer'
 import SearchVisualizer from '@/components/interactive/SearchVisualizer'
 import StackVisualizer from '@/components/interactive/StackVisualizer'
 import StackPlayground from '@/components/interactive/StackPlayground'
-import SqlPlayground from '@/components/interactive/SqlPlayground'
-import RelAlgebra from '@/components/interactive/RelAlgebra'
-import QueryTracer from '@/components/interactive/QueryTracer'
+import MatrixReducer from '@/components/interactive/MatrixReducer'
 import CircularQueueRing from '@/components/interactive/CircularQueueRing'
 import QueueTicketAnim from '@/components/interactive/QueueTicketAnim'
 import InfixConvertLab from '@/components/interactive/InfixConvertLab'
@@ -34,9 +32,7 @@ const INTERACTIVE: Record<string, React.ComponentType<any>> = {
   'search-visualizer': SearchVisualizer,
   'stack-visualizer': StackVisualizer,
   'stack-playground': StackPlayground,
-  'sql-playground': SqlPlayground,
-  'rel-algebra': RelAlgebra,
-  'query-tracer': QueryTracer,
+  'matrix-reducer': MatrixReducer,
   'circular-queue-ring': CircularQueueRing,
   'queue-ticket-anim': QueueTicketAnim,
   'infix-convert-lab': InfixConvertLab,
@@ -48,24 +44,6 @@ const INTERACTIVE: Record<string, React.ComponentType<any>> = {
 }
 
 export type ContentBlock = { type: string; [key: string]: any }
-
-
-// Accepts any YouTube URL form and returns a privacy-friendly embed URL.
-//   youtu.be/ID · watch?v=ID · /embed/ID · /shorts/ID · already-an-embed
-function ytEmbed(url: string): string | null {
-  if (!url) return null
-  const patterns = [
-    /(?:youtube\.com\/watch\?(?:.*&)?v=)([\w-]{6,})/,
-    /(?:youtu\.be\/)([\w-]{6,})/,
-    /(?:youtube(?:-nocookie)?\.com\/embed\/)([\w-]{6,})/,
-    /(?:youtube\.com\/shorts\/)([\w-]{6,})/,
-  ]
-  for (const re of patterns) {
-    const m = url.match(re)
-    if (m) return `https://www.youtube-nocookie.com/embed/${m[1]}?rel=0&modestbranding=1`
-  }
-  return null   // not a YouTube URL: caller falls back to a plain link
-}
 
 function Solution({ code, note }: { code?: string; note?: string }) {
   const [open, setOpen] = useState(false)
@@ -102,30 +80,6 @@ function Block({ block }: { block: ContentBlock }) {
         <pre style={{ background: 'var(--background)', border: '1px solid var(--card-border)', padding: 12, borderRadius: 8, fontSize: 13, overflowX: 'auto', margin: '0 0 10px' }}>{block.code}</pre>
       )
 
-    case 'video': {
-      const src = ytEmbed(block.url)
-      if (!src) {
-        return block.url
-          ? <p style={{ fontSize: 13, margin: '0 0 10px' }}><a href={block.url} target="_blank" rel="noopener noreferrer">▶ Watch the video</a></p>
-          : null
-      }
-      return (
-        <div style={{ margin: '6px 0 16px' }}>
-          {block.title && <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)', margin: '0 0 8px' }}>🎬 {block.title}</p>}
-          <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', borderRadius: 14, overflow: 'hidden', border: '1px solid var(--card-border)', background: '#000' }}>
-            <iframe
-              src={src}
-              title={block.title || 'Lesson video'}
-              loading="lazy"
-              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
-            />
-          </div>
-          {block.caption && <p style={{ fontSize: 12, lineHeight: 1.6, opacity: 0.65, margin: '8px 2px 0' }}>{block.caption}</p>}
-        </div>
-      )
-    }
     case 'note':
       return (
         <div style={{ borderLeft: '3px solid var(--accent)', background: 'var(--pill-bg)', padding: '10px 14px', borderRadius: '0 10px 10px 0', margin: '0 0 10px' }}>

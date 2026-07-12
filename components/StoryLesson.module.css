@@ -355,3 +355,12 @@
   margin: 0 0 16px;
   color: var(--foreground);
 }
+
+/* ---- Bengali toggle ---- */
+.heroTop { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
+.langBtn {
+  font-size: 12px; font-weight: 800; padding: 6px 14px; border-radius: 999px;
+  border: 1px solid var(--card-border); background: var(--card-bg);
+  color: var(--foreground); cursor: pointer; white-space: nowrap;
+}
+.langBtn:hover { border-color: var(--accent); color: var(--accent); }
