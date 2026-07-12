@@ -23,6 +23,7 @@ import SearchVisualizer from '@/components/interactive/SearchVisualizer'
 import StackVisualizer from '@/components/interactive/StackVisualizer'
 import StackPlayground from '@/components/interactive/StackPlayground'
 import SqlPlayground from '@/components/interactive/SqlPlayground'
+import SqlChallenge from '@/components/interactive/SqlChallenge'
 import RelAlgebra from '@/components/interactive/RelAlgebra'
 import QueryTracer from '@/components/interactive/QueryTracer'
 import CircularQueueRing from '@/components/interactive/CircularQueueRing'
@@ -46,6 +47,7 @@ const INTERACTIVE: Record<string, React.ComponentType<any>> = {
   'stack-visualizer': StackVisualizer,
   'stack-playground': StackPlayground,
   'sql-playground': SqlPlayground,
+  'sql-challenge': SqlChallenge,
   'rel-algebra': RelAlgebra,
   'query-tracer': QueryTracer,
   'circular-queue-ring': CircularQueueRing,
@@ -153,6 +155,26 @@ function CasesExplorer({ items }: { items: { label: string; content: string; ver
   )
 }
 
+// Click-to-reveal troubleshooting card. Used in the install lesson:
+// "It won't connect" -> click -> the fix.
+function RevealCard({ q, a, code }: { q: string; a: string; code?: string }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className={styles.revealCard}>
+      <button className={styles.revealQ} onClick={() => setOpen(o => !o)}>
+        <span>{open ? '▾' : '▸'} {q}</span>
+        <span className={styles.revealHint}>{open ? '' : 'click to see the fix'}</span>
+      </button>
+      {open && (
+        <div className={styles.revealA}>
+          <Rich text={a} />
+          {code && <pre className={styles.code}>{code}</pre>}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function ChapterBlock({ block }: { block: any }) {
   const t = useT()
   switch (block.b) {
@@ -223,6 +245,28 @@ function ChapterBlock({ block }: { block: any }) {
           {block.caption && <p className={styles.videoCaption}><Rich text={block.caption} /></p>}
         </div>
       )
+    }
+    case 'img': {
+      const items = block.items || [{ src: block.src, alt: block.alt, caption: block.caption, captionBn: block.captionBn }]
+      return (
+        <div className={items.length > 1 ? styles.imgPair : styles.imgSolo}>
+          {items.map((im: any, i: number) => (
+            <figure key={i} className={styles.figure}>
+              <img src={im.src} alt={im.alt || ''} className={styles.img} loading="lazy" />
+              {(im.caption || im.captionBn) && (
+                <figcaption className={styles.figCap}><Rich text={t(im.caption, im.captionBn)!} /></figcaption>
+              )}
+            </figure>
+          ))}
+        </div>
+      )
+    }
+    case 'reveal': {
+      return <RevealCard
+        q={t(block.q, block.qBn)!}
+        a={t(block.a, block.aBn)!}
+        code={block.code}
+      />
     }
     case 'note':
       return <div className={styles.note}>💡 <Rich text={t(block.text, block.bn)!} /></div>

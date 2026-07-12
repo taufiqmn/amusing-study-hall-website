@@ -1,0 +1,42 @@
+.head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.badge {
+  font-size: 11px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase;
+  color: #f6c945; background: rgba(246,201,69,.12); border: 1px solid rgba(246,201,69,.35);
+  padding: 4px 12px; border-radius: 999px;
+}
+.attempts { font-size: 11px; opacity: .5; font-weight: 700; }
+.task { font-size: 14px; line-height: 1.75; margin: 0 0 12px; font-weight: 600; }
+
+.btnRow { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+
+.hint {
+  margin-top: 10px; background: var(--background); border-left: 3px solid #f6c945;
+  padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 12.5px; line-height: 1.7;
+}
+
+.pass {
+  margin-top: 10px; background: rgba(79,195,161,.12); border: 1px solid #4FC3A1;
+  border-radius: 10px; padding: 11px 14px; font-size: 13px; font-weight: 700;
+}
+.fail {
+  margin-top: 10px; background: rgba(226,92,92,.1); border: 1px solid #e25c5c;
+  border-radius: 10px; padding: 11px 14px; font-size: 12.5px; line-height: 1.7;
+}
+.passWrap { border-color: #4FC3A1; }
+
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+@media (max-width: 680px) { .compare { grid-template-columns: 1fr; } }
+.gridBox { min-width: 0; }
+.gridLabel {
+  font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;
+  opacity: .55; margin: 0 0 6px;
+}
+.more { font-size: 10.5px; opacity: .5; margin: 6px 2px 0; }
+
+.solution { margin-top: 12px; }
+.solLabel { font-size: 11.5px; opacity: .6; margin: 0 0 6px; font-style: italic; }
+.pre {
+  font-family: monospace; font-size: 12.5px; line-height: 1.6;
+  background: var(--background); border: 1px solid var(--card-border);
+  padding: 12px 14px; border-radius: 10px; overflow-x: auto; margin: 0;
+}

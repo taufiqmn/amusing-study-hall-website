@@ -364,3 +364,31 @@
   color: var(--foreground); cursor: pointer; white-space: nowrap;
 }
 .langBtn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ---- image blocks ---- */
+.imgSolo { margin: 6px 0 18px; }
+.imgPair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 6px 0 18px; }
+@media (max-width: 620px) { .imgPair { grid-template-columns: 1fr; } }
+.figure { margin: 0; }
+.img {
+  width: 100%; height: auto; display: block;
+  border-radius: 14px; border: 1px solid var(--card-border);
+}
+.figCap { font-size: 12px; line-height: 1.6; opacity: 0.7; margin: 8px 2px 0; text-align: center; }
+
+/* ---- click-to-reveal ---- */
+.revealCard {
+  border: 1px solid var(--card-border); border-radius: 12px;
+  margin: 0 0 10px; overflow: hidden; background: var(--card-bg);
+}
+.revealQ {
+  width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  padding: 13px 16px; background: none; border: none; cursor: pointer;
+  color: var(--foreground); font-size: 13.5px; font-weight: 700; text-align: left;
+}
+.revealQ:hover { background: var(--pill-bg); }
+.revealHint { font-size: 10.5px; opacity: 0.45; font-weight: 600; white-space: nowrap; }
+.revealA {
+  padding: 4px 16px 15px; font-size: 13px; line-height: 1.75;
+  border-top: 1px dashed var(--card-border);
+}
