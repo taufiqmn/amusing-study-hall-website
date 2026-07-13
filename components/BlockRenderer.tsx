@@ -39,6 +39,7 @@ const INTERACTIVE: Record<string, React.ComponentType<any>> = {
   'sql-playground': SqlPlayground,
   'sql-challenge': SqlChallenge,
   'gaussian-solver': GaussianSolver,
+  'gauss-jordan': (p: any) => <GaussianSolver {...p} method="rref" />,
   'rel-algebra': RelAlgebra,
   'query-tracer': QueryTracer,
   'circular-queue-ring': CircularQueueRing,

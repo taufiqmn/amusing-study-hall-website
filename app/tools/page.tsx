@@ -22,6 +22,7 @@ import GaussianSolver from '@/components/interactive/GaussianSolver'
 
 const TOOLS = [
   { emoji: '🟰', title: 'Gaussian Solver', desc: 'Enter any 2×2, 3×3 or 4×4 system. Watch it reduce row by row to a unique, infinite, or no-solution verdict.', C: GaussianSolver },
+  { emoji: '🎯', title: 'Gauss-Jordan Solver', desc: 'Goes further than Gaussian — reduces all the way to RREF so the answer reads straight off, no back-substitution.', C: (p: any) => <GaussianSolver {...p} method="rref" /> },
   { emoji: '🧪', title: 'Array Playground', desc: 'Declare an array and watch boxes appear. Insert, delete, reverse — see every shift.', C: ArrayVisualizer },
   { emoji: '⏱', title: 'Complexity Lab', desc: 'Paste any code and get an estimated Big-O with reasons and a growth table.', C: ComplexityLab },
   { emoji: '📊', title: 'Sorting Visualizer', desc: 'Bubble, Selection and Insertion sort — animated bars with compare & swap counters.', C: SortVisualizer },

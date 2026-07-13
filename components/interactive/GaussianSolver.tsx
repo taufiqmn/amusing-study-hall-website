@@ -24,7 +24,7 @@ const f = (n: number) => new Fr(n)
 
 type Step = { desc: string; m: string[][]; changed: number[]; pivot?: [number, number] }
 
-function solve(matrix: number[][]) {
+function solve(matrix: number[][], mode: 'ref' | 'rref' = 'ref') {
   const rows = matrix.length, cols = matrix[0].length
   let M = matrix.map(r => r.map(f))
   const rev = Array(rows).fill(0)
@@ -35,6 +35,7 @@ function solve(matrix: number[][]) {
   snap('Augmented form')
 
   let pr = 0
+  const pivotCols: number[] = []
   for (let col = 0; col < cols - 1 && pr < rows; col++) {
     let sel = -1
     for (let r = pr; r < rows; r++) if (!M[r][col].isZero()) { sel = r; break }
@@ -53,7 +54,27 @@ function solve(matrix: number[][]) {
       const op = fs.startsWith('-') ? `+ (${fs.slice(1)})` : `− (${fs})`
       snap(`${lab(r)} = ${before} ${op}·${lab(pr)}`, [r], [pr, col])
     }
+    pivotCols[pr] = col
     pr++
+  }
+
+  // Gauss-Jordan: continue to reduced row echelon form
+  if (mode === 'rref') {
+    for (let i = pr - 1; i >= 0; i--) {
+      const col = pivotCols[i]
+      if (!(M[i][col].n === M[i][col].d)) {
+        const dv = M[i][col]; const before = lab(i)
+        M[i] = M[i].map(v => v.div(dv)); rev[i]++
+        snap(`${lab(i)} = ${before} ÷ (${dv.str()})`, [i], [i, col])
+      }
+      for (let r = i - 1; r >= 0; r--) {
+        if (M[r][col].isZero()) continue
+        const factor = M[r][col]; const before = lab(r)
+        M[r] = M[r].map((v, c) => v.sub(factor.mul(M[i][c]))); rev[r]++
+        const fs = factor.str(); const op = fs.startsWith('-') ? `+ (${fs.slice(1)})` : `− (${fs})`
+        snap(`${lab(r)} = ${before} ${op}·${lab(i)}`, [r], [i, col])
+      }
+    }
   }
 
   let inconsistent = false, pivots = 0
@@ -74,17 +95,22 @@ function solve(matrix: number[][]) {
     verdict = `Infinitely many solutions. Rank is ${pivots}, but there are ${unknowns} unknowns — so ${unknowns - pivots} free variable(s). One variable can be anything; the others follow.`
   } else {
     kind = 'unique'
-    const x: Fr[] = Array(unknowns).fill(null)
-    for (let r = unknowns - 1; r >= 0; r--) {
-      let sum = M[r][unknowns]
-      const terms: string[] = []
-      for (let c = r + 1; c < unknowns; c++) { sum = sum.sub(M[r][c].mul(x[c])); }
-      x[r] = sum.div(M[r][r])
-      back.push(`${names[r]} = ${x[r].str()}`)
+    if (mode === 'rref') {
+      solution = names.map((_, i) => M[i][unknowns].str())
+      back = names.map((n, i) => `${n} = ${solution![i]}`)
+      verdict = `Unique solution, read straight off: ${names.map((n, i) => `${n} = ${solution![i]}`).join(',  ')}`
+    } else {
+      const x: Fr[] = Array(unknowns).fill(null)
+      for (let r = unknowns - 1; r >= 0; r--) {
+        let sum = M[r][unknowns]
+        for (let c = r + 1; c < unknowns; c++) { sum = sum.sub(M[r][c].mul(x[c])); }
+        x[r] = sum.div(M[r][r])
+        back.push(`${names[r]} = ${x[r].str()}`)
+      }
+      back.reverse()
+      solution = x.map(v => v.str())
+      verdict = `Unique solution: ${names.map((n, i) => `${n} = ${solution![i]}`).join(',  ')}`
     }
-    back.reverse()
-    solution = x.map(v => v.str())
-    verdict = `Unique solution: ${names.map((n, i) => `${n} = ${solution![i]}`).join(',  ')}`
   }
   return { steps, verdict, kind, solution, back, unknowns, names, M }
 }
@@ -105,7 +131,7 @@ function parseCell(s: string): number | null {
   return Number.isFinite(n) ? n : null
 }
 
-export default function GaussianSolver({ preset = 'Unique (3×3)' }: { preset?: string }) {
+export default function GaussianSolver({ preset = 'Unique (3×3)', method = 'ref' }: { preset?: string; method?: 'ref' | 'rref' }) {
   const [size, setSize] = useState<[number, number]>([3, 4]) // rows, cols(=unknowns+1)
   const [cells, setCells] = useState<string[][]>(() =>
     (PRESETS[preset] || PRESETS['Unique (3×3)']).map(r => r.map(String)))
@@ -142,7 +168,7 @@ export default function GaussianSolver({ preset = 'Unique (3×3)' }: { preset?: 
       }
       nums.push(row)
     }
-    const r = solve(nums)
+    const r = solve(nums, method)
     setResult(r); setShown(1); setFreeVal(0); setFreeVar(Math.max(0, (size[1]-1)-1))
   }
 
