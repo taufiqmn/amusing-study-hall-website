@@ -47,6 +47,14 @@ export function toSQLite(oracleSql: string): Translation {
     // --- set operators ---
     s = s.replace(/\bMINUS\b/gi, 'EXCEPT')
 
+    // --- ALTER TABLE MODIFY (Oracle) → SQLite can't change a column type,
+    //     so we translate the common "add/modify column" shapes it can do and
+    //     leave a note for the rest. ADD (col type) → ADD COLUMN col type. ---
+    s = s.replace(/\bALTER\s+TABLE\s+(\w+)\s+ADD\s*\(\s*(\w+)\s+([^)]+)\)/gi,
+                  'ALTER TABLE $1 ADD COLUMN $2 $3')
+    s = s.replace(/\bALTER\s+TABLE\s+(\w+)\s+ADD\s+(\w+)\s+(TEXT|INTEGER|REAL|NUMERIC)/gi,
+                  'ALTER TABLE $1 ADD COLUMN $2 $3')
+
     // --- functions ---
     // NOTE: TO_DATE is handled BEFORE chunk-splitting (see below) because its
     // arguments are quoted literals, which the splitter would separate.

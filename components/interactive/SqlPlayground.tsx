@@ -18,10 +18,14 @@ export default function SqlPlayground({
   seed = '',
   starter = '',
   height = 260,
+  resetOnRun = false,
+  revealAnswer = '',
 }: {
   seed?: string
   starter?: string
   height?: number
+  resetOnRun?: boolean
+  revealAnswer?: string
 }) {
   const [ready, setReady] = useState(false)
   const [sql, setSql] = useState(starter)
@@ -86,6 +90,17 @@ export default function SqlPlayground({
     const raw = sql.trim()
     if (!raw) { setErr('Write a SQL statement first.'); return }
 
+    // If the script builds its own tables, reset first so re-running doesn't
+    // stack duplicate rows. Lessons opt in via resetOnRun.
+    if (resetOnRun) {
+      try {
+        const r = db.current.exec(`SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'`)
+        const names: string[] = r[0] ? r[0].values.map((v: any[]) => v[0]) : []
+        names.forEach((n) => db.current.run(`DROP TABLE IF EXISTS ${n}`))
+        if (seed) db.current.run(toSQLite(seed).sql)
+      } catch { /* ignore */ }
+    }
+
     const { sql: translated, notes: n } = toSQLite(raw)
     setNotes(n)
     try {
@@ -126,6 +141,14 @@ export default function SqlPlayground({
             <div className={styles.barBtns}>
               <button onClick={run} disabled={!ready} className={styles.runBtn}>▶ Run</button>
               <button onClick={reset} disabled={!ready} className={styles.ghostBtn}>↻ Reset</button>
+              {revealAnswer && (
+                <button
+                  onClick={() => { setSql(revealAnswer); setTimeout(run, 60) }}
+                  disabled={!ready}
+                  className={styles.ghostBtn}
+                  title="Paste the answer and run it"
+                >💡 Show answer</button>
+              )}
             </div>
           </div>
 

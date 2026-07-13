@@ -33,10 +33,17 @@
 .stepNum { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); }
 .op { font-family: monospace; font-size: 13px; font-weight: 700; }
 
-/* ── the matrix: real stacked brackets ── */
-.matrix { display: inline-flex; align-items: stretch; gap: 4px; }
-.bracket { font-size: 2.4rem; font-weight: 300; line-height: 1; display: flex; align-items: center; opacity: 0.6; }
-.mBody { display: flex; flex-direction: column; gap: 3px; padding: 4px 0; }
+/* ── the matrix: real stacked brackets that span the full height ── */
+.matrix { display: inline-flex; align-items: stretch; gap: 2px; }
+.bracket {
+  width: 10px;
+  border: 2.5px solid var(--foreground);
+  opacity: 0.55;
+  align-self: stretch;
+}
+.bracket:first-child { border-right: none; border-radius: 5px 0 0 5px; }
+.bracket:last-child  { border-left: none;  border-radius: 0 5px 5px 0; }
+.mBody { display: flex; flex-direction: column; gap: 3px; padding: 6px 8px; }
 .mRow { display: flex; gap: 4px; border-radius: 6px; transition: background .3s; }
 .mChanged { background: rgba(246,201,69,.16); }
 .mCell {

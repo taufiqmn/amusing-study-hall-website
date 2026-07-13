@@ -285,7 +285,7 @@ export default function GaussianSolver({ preset = 'Unique (3×3)', method = 'ref
 function Matrix({ rows, changed, pivot, cols }: { rows: string[][]; changed: number[]; pivot?: [number, number]; cols: number }) {
   return (
     <div className={styles.matrix}>
-      <span className={styles.bracket}>[</span>
+      <span className={styles.bracket} aria-hidden="true" />
       <div className={styles.mBody}>
         {rows.map((r, i) => (
           <div key={i} className={`${styles.mRow} ${changed.includes(i) ? styles.mChanged : ''}`}>
@@ -298,7 +298,7 @@ function Matrix({ rows, changed, pivot, cols }: { rows: string[][]; changed: num
           </div>
         ))}
       </div>
-      <span className={styles.bracket}>]</span>
+      <span className={styles.bracket} aria-hidden="true" />
     </div>
   )
 }
