@@ -15,6 +15,7 @@ import StackVisualizer from '@/components/interactive/StackVisualizer'
 import StackPlayground from '@/components/interactive/StackPlayground'
 import SqlPlayground from '@/components/interactive/SqlPlayground'
 import SqlChallenge from '@/components/interactive/SqlChallenge'
+import GaussianSolver from '@/components/interactive/GaussianSolver'
 import RelAlgebra from '@/components/interactive/RelAlgebra'
 import QueryTracer from '@/components/interactive/QueryTracer'
 import CircularQueueRing from '@/components/interactive/CircularQueueRing'
@@ -37,6 +38,7 @@ const INTERACTIVE: Record<string, React.ComponentType<any>> = {
   'stack-playground': StackPlayground,
   'sql-playground': SqlPlayground,
   'sql-challenge': SqlChallenge,
+  'gaussian-solver': GaussianSolver,
   'rel-algebra': RelAlgebra,
   'query-tracer': QueryTracer,
   'circular-queue-ring': CircularQueueRing,
