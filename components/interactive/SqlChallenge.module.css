@@ -40,3 +40,34 @@
   background: var(--background); border: 1px solid var(--card-border);
   padding: 12px 14px; border-radius: 10px; overflow-x: auto; margin: 0;
 }
+
+/* ── table / SQL peek toggles ── */
+.peekWrap { margin: 4px 0 12px; }
+.peekBtns { display: flex; flex-wrap: wrap; gap: 8px; }
+.peekBtn {
+  font-size: 12px; font-weight: 700; padding: 7px 13px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--card-border); background: var(--background); color: var(--foreground);
+}
+.peekBtn:hover { border-color: var(--accent); }
+.peekOn { background: var(--accent); color: #fff; border-color: var(--accent); }
+.peekPanel {
+  margin-top: 10px; padding: 12px; border: 1px solid var(--card-border);
+  border-radius: 10px; background: var(--background); display: flex; flex-direction: column; gap: 14px;
+}
+.peekTable { }
+.peekName { font-size: 12px; font-weight: 800; margin: 0 0 6px; color: var(--accent); }
+.peekCode {
+  font-family: monospace; font-size: 12px; line-height: 1.5; white-space: pre-wrap;
+  background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px;
+  padding: 10px 12px; margin: 0; overflow-x: auto;
+}
+.peekTip { font-size: 11px; opacity: 0.6; margin: 2px 0 0; }
+
+/* ── answer reveal warning ── */
+.solWarn {
+  font-size: 12px; font-weight: 700; line-height: 1.5;
+  color: #ff6b6b;
+  background: rgba(226, 92, 92, 0.10);
+  border: 1px solid rgba(226, 92, 92, 0.5);
+  border-radius: 8px; padding: 9px 12px; margin: 0 0 10px;
+}

@@ -36,6 +36,18 @@ function canon(g: Grid): string {
   return JSON.stringify({ cols, rows })
 }
 
+// Pull individual CREATE TABLE statements out of the seed so we can show each
+// table's schema (the CREATE code) and its data separately, with toggles.
+function parseSeedTables(seed: string): { name: string; create: string }[] {
+  const out: { name: string; create: string }[] = []
+  const re = /CREATE\s+TABLE\s+(\w+)\s*\(([\s\S]*?)\)\s*;/gi
+  let m: RegExpExecArray | null
+  while ((m = re.exec(seed)) !== null) {
+    out.push({ name: m[1], create: m[0].trim() })
+  }
+  return out
+}
+
 export default function SqlChallenge({
   seed = '',
   task = '',
@@ -62,7 +74,10 @@ export default function SqlChallenge({
   const [attempts, setAttempts] = useState(0)
   const [showHint, setShowHint] = useState(false)
   const [showSol, setShowSol] = useState(false)
+  const [showData, setShowData] = useState(false)   // "Show tables" (data)
+  const [showSchema, setShowSchema] = useState(false) // "Show SQL" (CREATE code)
   const db = useRef<any>(null)
+  const seedTables = parseSeedTables(seed)
 
   useEffect(() => {
     let dead = false
@@ -168,6 +183,55 @@ export default function SqlChallenge({
 
       <p className={cstyles.task}>{task}</p>
 
+      {seedTables.length > 0 && (
+        <div className={cstyles.peekWrap}>
+          <div className={cstyles.peekBtns}>
+            <button
+              onClick={() => setShowData(s => !s)}
+              className={`${cstyles.peekBtn} ${showData ? cstyles.peekOn : ''}`}
+            >📊 {showData ? 'Hide' : 'Show'} table{seedTables.length > 1 ? 's' : ''} & data</button>
+            <button
+              onClick={() => setShowSchema(s => !s)}
+              className={`${cstyles.peekBtn} ${showSchema ? cstyles.peekOn : ''}`}
+            >{'</>'} {showSchema ? 'Hide' : 'Show'} CREATE code</button>
+          </div>
+
+          {showData && (
+            <div className={cstyles.peekPanel}>
+              {seedTables.map(t => {
+                let g: Grid = { cols: [], rows: [] }
+                try { if (ready) g = exec(`SELECT * FROM ${t.name}`) } catch {}
+                return (
+                  <div key={t.name} className={cstyles.peekTable}>
+                    <p className={cstyles.peekName}>📋 {t.name}</p>
+                    <div className={styles.tableScroll}>
+                      <table className={styles.results}>
+                        <thead><tr>{g.cols.map(c => <th key={c}>{c}</th>)}</tr></thead>
+                        <tbody>
+                          {g.rows.slice(0, 12).map((r, i) => (
+                            <tr key={i}>{r.map((v, j) => <td key={j} className={v === null ? styles.nullCell : ''}>{v === null ? 'NULL' : String(v)}</td>)}</tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    {g.rows.length > 12 && <p className={cstyles.more}>…{g.rows.length} rows total</p>}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {showSchema && (
+            <div className={cstyles.peekPanel}>
+              {seedTables.map(t => (
+                <pre key={t.name} className={cstyles.peekCode}>{t.create}</pre>
+              ))}
+              <p className={cstyles.peekTip}>The CREATE code shows each column's type and which columns are keys / foreign keys.</p>
+            </div>
+          )}
+        </div>
+      )}
+
       <textarea
         value={sql}
         onChange={e => setSql(e.target.value)}
@@ -181,9 +245,21 @@ export default function SqlChallenge({
       <div className={cstyles.btnRow}>
         <button onClick={check} disabled={!ready} className={styles.runBtn}>✓ Check my answer</button>
         {hint && <button onClick={() => setShowHint(h => !h)} className={styles.ghostBtn}>💡 Hint</button>}
-        {solution && attempts > 0 && (
-          <button onClick={() => setShowSol(s => !s)} className={styles.ghostBtn}>
-            {showSol ? 'Hide' : 'Reveal'} answer
+        {solution && (
+          <button
+            onClick={() => {
+              const next = !showSol
+              setShowSol(next)
+              if (next && attempts === 0) {
+                try {
+                  window.dispatchEvent(new CustomEvent('sql-challenge-result', {
+                    detail: { id, passed: false, attempts: 0, firstTry: false, revealed: true },
+                  }))
+                } catch {}
+              }
+            }}
+            className={styles.ghostBtn}>
+            {showSol ? 'Hide' : 'Show'} answer
           </button>
         )}
       </div>
@@ -205,6 +281,11 @@ export default function SqlChallenge({
 
       {showSol && solution && (
         <div className={cstyles.solution}>
+          {attempts === 0 && (
+            <p className={cstyles.solWarn}>
+              ⚠ You're viewing the answer before attempting. If you're logged in, this challenge won't count towards your badge score. Try it yourself first for the credit.
+            </p>
+          )}
           <p className={cstyles.solLabel}>One correct answer — yours may differ and still be right:</p>
           <pre className={styles.code || cstyles.pre}>{solution}</pre>
         </div>
