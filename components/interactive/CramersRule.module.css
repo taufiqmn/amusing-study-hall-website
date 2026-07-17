@@ -1,0 +1,13 @@
+.recBtn {
+  font-size: 11.5px; font-weight: 700; padding: 6px 12px; border-radius: 999px;
+  border: 1px solid var(--card-border); background: var(--background); color: var(--foreground); cursor: pointer;
+}
+.recBtn:hover { border-color: var(--accent); color: var(--accent); }
+
+.axbRow { display: flex; align-items: center; gap: 10px; margin: 12px 0; flex-wrap: wrap; }
+.aGrid { display: grid; gap: 6px; flex: 1; min-width: 140px; }
+.bGrid { display: flex; flex-direction: column; gap: 6px; width: 60px; }
+.xLabel { font-family: monospace; font-weight: 800; font-size: 16px; opacity: 0.7; }
+.eq { font-family: monospace; font-weight: 800; font-size: 18px; opacity: 0.6; }
+
+.colHi { background: rgba(246, 201, 69, 0.28) !important; font-weight: 900; }

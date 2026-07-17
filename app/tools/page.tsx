@@ -18,6 +18,7 @@ import SqlPlayground from '@/components/interactive/SqlPlayground'
 import QueryTracer from '@/components/interactive/QueryTracer'
 import HanoiVisualizer from '@/components/interactive/HanoiVisualizer'
 import GaussianSolver from '@/components/interactive/GaussianSolver'
+import CramersRule from '@/components/interactive/CramersRule'
 
 // Each tool carries a `subject`. The filter reads from this automatically —
 // to add a future tool, just give it a subject and it appears under that filter.
@@ -27,6 +28,7 @@ const TOOLS: Tool[] = [
   // Linear Algebra
   { emoji: '🟰', title: 'Gaussian Solver', subject: 'Linear Algebra', desc: 'Enter any 2×2, 3×3 or 4×4 system. Watch it reduce row by row to a unique, infinite, or no-solution verdict.', C: GaussianSolver },
   { emoji: '🎯', title: 'Gauss-Jordan Solver', subject: 'Linear Algebra', desc: 'Goes further than Gaussian — reduces all the way to RREF so the answer reads straight off, no back-substitution.', C: (p: any) => <GaussianSolver {...p} method="rref" /> },
+  { emoji: '📐', title: "Cramer's Rule Solver", subject: 'Linear Algebra', desc: 'Enter any 2×2, 3×3 or 4×4 system. See det(A), each column replaced by B, and every xi computed — full lines, exact fractions.', C: CramersRule },
   // Database
   { emoji: '🗄️', title: 'SQL Playground', subject: 'Database', desc: 'Write real Oracle SQL and run it live. Click any table to see its columns and types.', C: SqlPlayground },
   { emoji: '🔎', title: 'Query Tracer', subject: 'Database', desc: 'See the order SQL ACTUALLY runs in — watch rows drop, multiply and collapse at each clause.', C: QueryTracer },

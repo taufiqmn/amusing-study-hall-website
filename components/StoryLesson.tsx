@@ -26,6 +26,8 @@ import SqlPlayground from '@/components/interactive/SqlPlayground'
 import SqlChallenge from '@/components/interactive/SqlChallenge'
 import GaussianSolver from '@/components/interactive/GaussianSolver'
 import JoinVisualizer from '@/components/interactive/JoinVisualizer'
+import CramersRule from '@/components/interactive/CramersRule'
+import CramersChallenge from '@/components/interactive/CramersChallenge'
 import GaussianChallenge from '@/components/interactive/GaussianChallenge'
 import RelAlgebra from '@/components/interactive/RelAlgebra'
 import QueryTracer from '@/components/interactive/QueryTracer'
@@ -53,6 +55,7 @@ const INTERACTIVE: Record<string, React.ComponentType<any>> = {
   'sql-challenge': SqlChallenge,
   'gaussian-solver': GaussianSolver,
   'join-visualizer': JoinVisualizer,
+  'cramers-rule': CramersRule,
   'gauss-jordan': (p: any) => <GaussianSolver {...p} method="rref" />,
   'rel-algebra': RelAlgebra,
   'query-tracer': QueryTracer,
@@ -314,6 +317,12 @@ function LongQuestions({ items }: { items: any[] }) {
               expected={lq.matrixExpected}
               answerType={lq.answerType || 'unique'}
               solutionMatrix={lq.solutionMatrix}
+            />
+          ) : lq.mode === 'cramer' ? (
+            <CramersChallenge
+              A={lq.cramerA}
+              B={lq.cramerB}
+              expected={lq.matrixExpected}
             />
           ) : lq.mode === 'sql' ? (
             <SqlChallenge
