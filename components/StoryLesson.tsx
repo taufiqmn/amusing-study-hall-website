@@ -198,6 +198,62 @@ function ChapterBlock({ block }: { block: any }) {
         ? <pre className={styles.eqBlock}>{eqText}</pre>
         : <div className={styles.eq}>{eqText}</div>
     }
+    // Real matrices — rendered as DOM rows with CSS-drawn brackets, never ASCII
+    // text alignment. parts: [{type:'matrix', label, rows, highlightCol?, det?}
+    // | {type:'op', text}]
+    case 'matrixeq': {
+      return (
+        <div className={styles.matrixEqRow}>
+          {block.parts.map((p: any, i: number) => {
+            if (p.type === 'op') return <span key={i} className={styles.matrixEqOp}>{p.text}</span>
+            return (
+              <div key={i} className={styles.matrixEqItem}>
+                {p.label && <p className={styles.matrixEqLabel}>{p.label}</p>}
+                <div className={styles.matrix}>
+                  <span className={styles.bracket} aria-hidden="true" />
+                  <div className={styles.mBody}>
+                    {p.rows.map((row: string[], r: number) => (
+                      <div key={r} className={styles.mRow}>
+                        {row.map((v: string, c: number) => (
+                          <span key={c} className={`${styles.mCell} ${p.highlightCol === c ? styles.matrixEqHi : ''}`}>{v}</span>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                  <span className={styles.bracket} aria-hidden="true" />
+                </div>
+                {p.det !== undefined && <p className={styles.matrixEqDet}>det = {p.det}</p>}
+              </div>
+            )
+          })}
+        </div>
+      )
+    }
+    // Exam-style stacked fractions: x = det(A1)/det(A) = -2/-1 = 2
+    case 'fraction': {
+      return (
+        <div className={styles.fracRow}>
+          {block.items.map((it: any, i: number) => (
+            <div key={i} className={styles.fracLine}>
+              <span className={styles.fracVar}>{it.var} =</span>
+              <span className={styles.fracStack}>
+                <span className={styles.fracNum}>{it.num}</span>
+                <span className={styles.fracBar} />
+                <span className={styles.fracDen}>{it.den}</span>
+              </span>
+              <span className={styles.fracEq}>=</span>
+              <span className={styles.fracStack}>
+                <span className={styles.fracNum}>{it.numVal}</span>
+                <span className={styles.fracBar} />
+                <span className={styles.fracDen}>{it.denVal}</span>
+              </span>
+              <span className={styles.fracEq}>=</span>
+              <span className={styles.fracResult}>{it.result}</span>
+            </div>
+          ))}
+        </div>
+      )
+    }
     case 'code':
       return (
         <div>

@@ -35,18 +35,35 @@ function det(M: Fr[][]): Fr {
   return sum
 }
 
-type Step = { kind: 'setup' | 'detA' | 'detAi' | 'xi'; label: string; matrix?: string[][]; value?: string; highlightCol?: number }
+type MatPart = { label: string; rows: string[][]; highlightCol?: number; op?: never } | { op: string; label?: never; rows?: never }
+type Step = { kind: 'setup' | 'detA' | 'detAi' | 'xi'; label: string; matrix?: string[][]; parts?: MatPart[]; value?: string; highlightCol?: number }
 
-function solve(A: number[][], B: number[]) {
+function solve(A: number[][], B: number[], detOnly = false) {
   const n = A.length
   const Af = A.map(r => r.map(f)), Bf = B.map(f)
   const steps: Step[] = []
   const names = ['x', 'y', 'z', 'w'].slice(0, n)
 
-  steps.push({ kind: 'setup', label: 'Write the system as AX = B', matrix: Af.map(r => r.map(x => x.str())) })
+  // Setup: show A, X (symbolic column), and B side by side — not A alone.
+  const Astr = Af.map(r => r.map(x => x.str()))
+  const Xstr = names.map(nm => [nm])
+  const Bstr = Bf.map(x => [x.str()])
+  steps.push({
+    kind: 'setup',
+    label: 'Write the system as AX = B',
+    parts: [
+      { label: 'A', rows: Astr },
+      { op: '·' },
+      { label: 'X', rows: Xstr },
+      { op: '=' },
+      { label: 'B', rows: Bstr },
+    ],
+  })
 
   const detA = det(Af)
-  steps.push({ kind: 'detA', label: `det(A) = ${detA.str()}`, matrix: Af.map(r => r.map(x => x.str())), value: detA.str() })
+  steps.push({ kind: 'detA', label: `det(A) = ${detA.str()}`, matrix: Astr, value: detA.str() })
+
+  if (detOnly) return { steps, verdict: 'detOnly', solution: null, names }
 
   if (detA.isZero()) {
     return { steps, verdict: `det(A) = 0 — Cramer's Rule does not apply here (no unique solution).`, solution: null, names }
@@ -109,6 +126,7 @@ export default function CramersRule({
   const [result, setResult] = useState<ReturnType<typeof solve> | null>(null)
   const [shown, setShown] = useState(0)
   const [err, setErr] = useState('')
+  const [detOnlyMode, setDetOnlyMode] = useState(false)
   const playRef = useRef<any>(null)
 
   const load = (n: number, mat: number[][], vec: number[]) => {
@@ -130,13 +148,17 @@ export default function CramersRule({
       }
       nums.push(row)
     }
-    const bvals: number[] = []
-    for (let i = 0; i < size; i++) {
-      const v = parseCell(B[i] ?? '')
-      if (v === null) { setErr(`B, row ${i + 1} isn't a number.`); return }
-      bvals.push(v)
+    let bvals: number[] = []
+    if (!detOnlyMode) {
+      for (let i = 0; i < size; i++) {
+        const v = parseCell(B[i] ?? '')
+        if (v === null) { setErr(`B, row ${i + 1} isn't a number.`); return }
+        bvals.push(v)
+      }
+    } else {
+      bvals = Array(size).fill(0) // unused in det-only mode
     }
-    const r = solve(nums, bvals)
+    const r = solve(nums, bvals, detOnlyMode)
     setResult(r); setShown(1)
   }
 
@@ -159,6 +181,10 @@ export default function CramersRule({
           ))}
           <button className={own.recBtn} onClick={() => pickSize(size)}>⭐ Recommended</button>
           <button className={own.recBtn} onClick={randomize}>🎲 Random</button>
+          <button
+            className={`${own.recBtn} ${detOnlyMode ? own.recOn : ''}`}
+            onClick={() => { setDetOnlyMode(m => !m); setResult(null); setShown(0) }}
+          >🧮 {detOnlyMode ? 'Determinant only ✓' : 'Determinant only'}</button>
         </div>
       )}
 
@@ -170,14 +196,18 @@ export default function CramersRule({
               onChange={e => { const n = A.map(r => [...r]); n[i][j] = e.target.value; setA(n) }} />
           )))}
         </div>
-        <span className={own.xLabel}>X</span>
-        <span className={own.eq}>=</span>
-        <div className={own.bGrid}>
-          {B.map((v, i) => (
-            <input key={i} className={styles.cell} value={v}
-              onChange={e => { const n = [...B]; n[i] = e.target.value; setB(n) }} />
-          ))}
-        </div>
+        {!detOnlyMode && (
+          <>
+            <span className={own.xLabel}>X</span>
+            <span className={own.eq}>=</span>
+            <div className={own.bGrid}>
+              {B.map((v, i) => (
+                <input key={i} className={styles.cell} value={v}
+                  onChange={e => { const n = [...B]; n[i] = e.target.value; setB(n) }} />
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       <div className={styles.btnRow}>
@@ -192,7 +222,28 @@ export default function CramersRule({
       {result && result.steps.slice(0, shown).map((st, i) => (
         <div key={i} className={styles.step}>
           <div className={styles.stepDesc}><span className={styles.op}>{st.label}</span></div>
-          {st.matrix && (
+          {st.parts ? (
+            <div className={own.partsRow}>
+              {st.parts.map((p: any, pi: number) => p.op ? (
+                <span key={pi} className={own.partsOp}>{p.op}</span>
+              ) : (
+                <div key={pi} className={own.partsItem}>
+                  <p className={own.partsLabel}>{p.label}</p>
+                  <div className={styles.matrix}>
+                    <span className={styles.bracket} aria-hidden="true" />
+                    <div className={styles.mBody}>
+                      {p.rows.map((row: string[], r: number) => (
+                        <div key={r} className={styles.mRow}>
+                          {row.map((v: string, c: number) => <span key={c} className={styles.mCell}>{v}</span>)}
+                        </div>
+                      ))}
+                    </div>
+                    <span className={styles.bracket} aria-hidden="true" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : st.matrix && (
             <div className={styles.matrix}>
               <span className={styles.bracket} aria-hidden="true" />
               <div className={styles.mBody}>
@@ -212,7 +263,9 @@ export default function CramersRule({
 
       {result && shown >= result.steps.length && (
         <div className={`${styles.verdict} ${result.solution ? styles.unique : styles.inconsistent}`}>
-          {result.solution ? (
+          {result.verdict === 'detOnly' ? (
+            <p className={styles.vTitle}>✅ det(A) computed above.</p>
+          ) : result.solution ? (
             <>
               <p className={styles.vTitle}>✅ Solution</p>
               <div className={styles.backSub}>

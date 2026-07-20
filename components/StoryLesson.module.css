@@ -392,3 +392,43 @@
   padding: 4px 16px 15px; font-size: 13px; line-height: 1.75;
   border-top: 1px dashed var(--card-border);
 }
+
+/* ── real stacked-bracket matrices (verified rendering, reused for static illustrations) ── */
+.matrix { display: inline-flex; align-items: stretch; gap: 2px; }
+.bracket {
+  width: 10px;
+  border: 2.5px solid var(--foreground);
+  opacity: 0.55;
+  align-self: stretch;
+}
+.bracket:first-child { border-right: none; border-radius: 5px 0 0 5px; }
+.bracket:last-child  { border-left: none;  border-radius: 0 5px 5px 0; }
+.mBody { display: flex; flex-direction: column; gap: 3px; padding: 6px 8px; }
+.mRow { display: flex; gap: 4px; border-radius: 6px; }
+.mCell {
+  min-width: 34px; text-align: center; font-family: monospace; font-size: 13.5px; font-weight: 600;
+  padding: 5px 7px; border-radius: 5px;
+}
+
+/* ── matrixeq block: A · X = B, or A1/A2/A3 side by side, with optional
+      column highlight + det() value ── */
+.matrixEqRow {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  margin: 14px 0; padding: 14px; background: var(--background);
+  border: 1px solid var(--card-border); border-radius: 12px; overflow-x: auto;
+}
+.matrixEqItem { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.matrixEqLabel { font-size: 11px; font-weight: 800; opacity: 0.7; margin: 0; text-align: center; }
+.matrixEqOp { font-family: monospace; font-size: 20px; font-weight: 800; opacity: 0.55; }
+.matrixEqHi { background: rgba(246, 201, 69, 0.28) !important; font-weight: 900; color: var(--accent-2, #f6c945); }
+.matrixEqDet { font-family: monospace; font-size: 12px; font-weight: 700; color: var(--accent); margin: 0; }
+
+/* ── fraction block: exam-style stacked num/den ── */
+.fracRow { margin: 14px 0; padding: 14px; background: var(--background); border: 1px solid var(--card-border); border-radius: 12px; display: flex; flex-direction: column; gap: 14px; }
+.fracLine { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-family: monospace; }
+.fracVar { font-size: 15px; font-weight: 800; }
+.fracEq { font-size: 15px; font-weight: 800; opacity: 0.55; }
+.fracStack { display: inline-flex; flex-direction: column; align-items: center; font-size: 14px; font-weight: 700; line-height: 1.4; }
+.fracNum, .fracDen { padding: 0 6px; }
+.fracBar { display: block; width: 100%; min-width: 44px; height: 2px; background: var(--foreground); opacity: 0.6; margin: 1px 0; }
+.fracResult { font-size: 17px; font-weight: 900; color: var(--accent); }

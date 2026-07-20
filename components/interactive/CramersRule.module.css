@@ -11,3 +11,10 @@
 .eq { font-family: monospace; font-weight: 800; font-size: 18px; opacity: 0.6; }
 
 .colHi { background: rgba(246, 201, 69, 0.28) !important; font-weight: 900; }
+
+.recOn { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.partsRow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.partsItem { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.partsLabel { font-size: 12px; font-weight: 800; opacity: 0.75; margin: 0; }
+.partsOp { font-family: monospace; font-size: 20px; font-weight: 800; opacity: 0.55; }
