@@ -18,3 +18,20 @@
 .partsItem { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .partsLabel { font-size: 12px; font-weight: 800; opacity: 0.75; margin: 0; }
 .partsOp { font-family: monospace; font-size: 20px; font-weight: 800; opacity: 0.55; }
+
+/* ── per-determinant "show determinant steps" (collapsed by default) ── */
+.detToggleWrap { margin-top: 10px; }
+.detToggleBtn {
+  font-size: 11.5px; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer;
+  border: 1px dashed var(--card-border); background: transparent; color: var(--accent);
+}
+.detToggleBtn:hover { border-color: var(--accent); }
+.detPanel {
+  margin-top: 10px; padding: 12px; border: 1px solid var(--card-border); border-radius: 10px;
+  background: var(--background);
+}
+.detNode { margin: 4px 0; }
+.detLine { font-family: monospace; font-size: 12.5px; font-weight: 700; margin: 0 0 6px; opacity: 0.95; }
+.detTerms { display: flex; flex-direction: column; gap: 10px; padding-left: 6px; border-left: 2px solid var(--card-border); margin-top: 4px; }
+.detTerm { display: flex; flex-direction: column; gap: 6px; }
+.detTermLabel { font-family: monospace; font-size: 12px; font-weight: 700; opacity: 0.85; margin: 0; }

@@ -35,10 +35,50 @@ function det(M: Fr[][]): Fr {
   return sum
 }
 
-type MatPart = { label: string; rows: string[][]; highlightCol?: number; op?: never } | { op: string; label?: never; rows?: never }
-type Step = { kind: 'setup' | 'detA' | 'detAi' | 'xi'; label: string; matrix?: string[][]; parts?: MatPart[]; value?: string; highlightCol?: number }
+// ── determinant EXPANSION tree — the "how" behind a det() value ──
+// 2x2 is a direct formula (ad-bc). 3x3+ expands along row 1 into minors,
+// each minor recursively expanded the same way, down to the 2x2 base case.
+type DetNode = {
+  value: Fr
+  text: string
+  terms?: { coef: string; sign: 1 | -1; minor: string[][]; sub: DetNode }[]
+}
+function detExpand(M: Fr[][]): DetNode {
+  const n = M.length
+  if (n === 1) return { value: M[0][0], text: `det = ${M[0][0].str()}` }
+  if (n === 2) {
+    const [[a, b], [c, d]] = M
+    const ad = a.mul(d), bc = b.mul(c), val = ad.sub(bc)
+    return { value: val, text: `det = (${a.str()}×${d.str()}) − (${b.str()}×${c.str()}) = ${ad.str()} − ${bc.str()} = ${val.str()}` }
+  }
+  const terms: DetNode['terms'] = []
+  let sum = f(0)
+  for (let c = 0; c < n; c++) {
+    const minor = M.slice(1).map(row => row.filter((_, j) => j !== c))
+    const sign: 1 | -1 = c % 2 === 0 ? 1 : -1
+    const sub = detExpand(minor)
+    const term = M[0][c].mul(sub.value).mul(f(sign))
+    sum = sum.add(term)
+    terms!.push({ coef: M[0][c].str(), sign, minor: minor.map(r => r.map(x => x.str())), sub })
+  }
+  const formula = terms!.map((t, i) =>
+    (i === 0 ? (t.sign < 0 ? '−' : '') : (t.sign < 0 ? ' − ' : ' + ')) + `${t.coef}·det(minor${i + 1})`
+  ).join('')
+  return { value: sum, text: `det = ${formula} = ${sum.str()}`, terms }
+}
 
-function solve(A: number[][], B: number[], detOnly = false) {
+type MatPart = { label: string; rows: string[][]; highlightCol?: number; op?: never } | { op: string; label?: never; rows?: never }
+type Step = {
+  kind: 'setup' | 'detA' | 'detAi' | 'xi'
+  label: string
+  matrix?: string[][]
+  parts?: MatPart[]
+  value?: string
+  highlightCol?: number
+  detNode?: DetNode   // present on detA / detAi steps — the expansion, hidden until asked for
+}
+
+function solve(A: number[][], B: number[]) {
   const n = A.length
   const Af = A.map(r => r.map(f)), Bf = B.map(f)
   const steps: Step[] = []
@@ -60,10 +100,9 @@ function solve(A: number[][], B: number[], detOnly = false) {
     ],
   })
 
-  const detA = det(Af)
-  steps.push({ kind: 'detA', label: `det(A) = ${detA.str()}`, matrix: Astr, value: detA.str() })
-
-  if (detOnly) return { steps, verdict: 'detOnly', solution: null, names }
+  const detANode = detExpand(Af)
+  const detA = detANode.value
+  steps.push({ kind: 'detA', label: `det(A) = ${detA.str()}`, matrix: Astr, value: detA.str(), detNode: detANode })
 
   if (detA.isZero()) {
     return { steps, verdict: `det(A) = 0 — Cramer's Rule does not apply here (no unique solution).`, solution: null, names }
@@ -72,7 +111,8 @@ function solve(A: number[][], B: number[], detOnly = false) {
   const solution: string[] = []
   for (let i = 0; i < n; i++) {
     const Ai = Af.map((row, r) => row.map((v, c) => (c === i ? Bf[r] : v)))
-    const detAi = det(Ai)
+    const detAiNode = detExpand(Ai)
+    const detAi = detAiNode.value
     const xi = detAi.div(detA)
     steps.push({
       kind: 'detAi',
@@ -80,6 +120,7 @@ function solve(A: number[][], B: number[], detOnly = false) {
       matrix: Ai.map(r => r.map(x => x.str())),
       value: detAi.str(),
       highlightCol: i,
+      detNode: detAiNode,
     })
     steps.push({
       kind: 'xi',
@@ -116,6 +157,39 @@ function parseCell(s: string): number | null {
   return Number.isFinite(n) ? n : null
 }
 
+// ── renders one determinant's expansion tree — matrices with real brackets,
+//    recursing into minors until the 2x2 base case ──
+function DetExpansionView({ node, depth = 0 }: { node: DetNode; depth?: number }) {
+  return (
+    <div className={own.detNode} style={{ marginLeft: depth ? 14 : 0 }}>
+      <p className={own.detLine}>{node.text}</p>
+      {node.terms && (
+        <div className={own.detTerms}>
+          {node.terms.map((t, i) => (
+            <div key={i} className={own.detTerm}>
+              <p className={own.detTermLabel}>
+                {t.sign < 0 ? '−' : '+'} {t.coef} × det(minor{i + 1})
+              </p>
+              <div className={styles.matrix}>
+                <span className={styles.bracket} aria-hidden="true" />
+                <div className={styles.mBody}>
+                  {t.minor.map((row, r) => (
+                    <div key={r} className={styles.mRow}>
+                      {row.map((v, c) => <span key={c} className={styles.mCell}>{v}</span>)}
+                    </div>
+                  ))}
+                </div>
+                <span className={styles.bracket} aria-hidden="true" />
+              </div>
+              <DetExpansionView node={t.sub} depth={depth + 1} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function CramersRule({
   initialA, initialB, lockControls = false,
 }: { initialA?: number[][]; initialB?: number[]; lockControls?: boolean } = {}) {
@@ -126,12 +200,12 @@ export default function CramersRule({
   const [result, setResult] = useState<ReturnType<typeof solve> | null>(null)
   const [shown, setShown] = useState(0)
   const [err, setErr] = useState('')
-  const [detOnlyMode, setDetOnlyMode] = useState(false)
+  const [openDet, setOpenDet] = useState<Set<number>>(new Set())  // which step indices have "show determinant steps" open
   const playRef = useRef<any>(null)
 
   const load = (n: number, mat: number[][], vec: number[]) => {
     setSize(n); setA(mat.map(r => r.map(String))); setB(vec.map(String))
-    setResult(null); setShown(0); setErr('')
+    setResult(null); setShown(0); setErr(''); setOpenDet(new Set())
   }
   const pickSize = (n: number) => load(n, PRESETS[n][0].A, PRESETS[n][0].B)
   const randomize = () => { const { A: a, B: b } = randomSystem(size); load(size, a, b) }
@@ -148,18 +222,14 @@ export default function CramersRule({
       }
       nums.push(row)
     }
-    let bvals: number[] = []
-    if (!detOnlyMode) {
-      for (let i = 0; i < size; i++) {
-        const v = parseCell(B[i] ?? '')
-        if (v === null) { setErr(`B, row ${i + 1} isn't a number.`); return }
-        bvals.push(v)
-      }
-    } else {
-      bvals = Array(size).fill(0) // unused in det-only mode
+    const bvals: number[] = []
+    for (let i = 0; i < size; i++) {
+      const v = parseCell(B[i] ?? '')
+      if (v === null) { setErr(`B, row ${i + 1} isn't a number.`); return }
+      bvals.push(v)
     }
-    const r = solve(nums, bvals, detOnlyMode)
-    setResult(r); setShown(1)
+    const r = solve(nums, bvals)
+    setResult(r); setShown(1); setOpenDet(new Set())
   }
 
   const play = () => {
@@ -168,6 +238,14 @@ export default function CramersRule({
     playRef.current = setInterval(() => {
       setShown(s => { if (s >= result.steps.length) { clearInterval(playRef.current); return s } return s + 1 })
     }, 1100)
+  }
+
+  const toggleDet = (i: number) => {
+    setOpenDet(prev => {
+      const next = new Set(prev)
+      if (next.has(i)) next.delete(i); else next.add(i)
+      return next
+    })
   }
 
   return (
@@ -181,10 +259,6 @@ export default function CramersRule({
           ))}
           <button className={own.recBtn} onClick={() => pickSize(size)}>⭐ Recommended</button>
           <button className={own.recBtn} onClick={randomize}>🎲 Random</button>
-          <button
-            className={`${own.recBtn} ${detOnlyMode ? own.recOn : ''}`}
-            onClick={() => { setDetOnlyMode(m => !m); setResult(null); setShown(0) }}
-          >🧮 {detOnlyMode ? 'Determinant only ✓' : 'Determinant only'}</button>
         </div>
       )}
 
@@ -196,18 +270,14 @@ export default function CramersRule({
               onChange={e => { const n = A.map(r => [...r]); n[i][j] = e.target.value; setA(n) }} />
           )))}
         </div>
-        {!detOnlyMode && (
-          <>
-            <span className={own.xLabel}>X</span>
-            <span className={own.eq}>=</span>
-            <div className={own.bGrid}>
-              {B.map((v, i) => (
-                <input key={i} className={styles.cell} value={v}
-                  onChange={e => { const n = [...B]; n[i] = e.target.value; setB(n) }} />
-              ))}
-            </div>
-          </>
-        )}
+        <span className={own.xLabel}>X</span>
+        <span className={own.eq}>=</span>
+        <div className={own.bGrid}>
+          {B.map((v, i) => (
+            <input key={i} className={styles.cell} value={v}
+              onChange={e => { const n = [...B]; n[i] = e.target.value; setB(n) }} />
+          ))}
+        </div>
       </div>
 
       <div className={styles.btnRow}>
@@ -258,14 +328,26 @@ export default function CramersRule({
               <span className={styles.bracket} aria-hidden="true" />
             </div>
           )}
+
+          {/* per-determinant "show determinant steps" — collapsed by default */}
+          {st.detNode && (
+            <div className={own.detToggleWrap}>
+              <button className={own.detToggleBtn} onClick={() => toggleDet(i)}>
+                {openDet.has(i) ? '▾ Hide determinant steps' : '▸ Show determinant steps'}
+              </button>
+              {openDet.has(i) && (
+                <div className={own.detPanel}>
+                  <DetExpansionView node={st.detNode} />
+                </div>
+              )}
+            </div>
+          )}
         </div>
       ))}
 
       {result && shown >= result.steps.length && (
         <div className={`${styles.verdict} ${result.solution ? styles.unique : styles.inconsistent}`}>
-          {result.verdict === 'detOnly' ? (
-            <p className={styles.vTitle}>✅ det(A) computed above.</p>
-          ) : result.solution ? (
+          {result.solution ? (
             <>
               <p className={styles.vTitle}>✅ Solution</p>
               <div className={styles.backSub}>
