@@ -205,7 +205,7 @@ function ChapterBlock({ block }: { block: any }) {
       return (
         <div className={styles.matrixEqRow}>
           {block.parts.map((p: any, i: number) => {
-            if (p.type === 'op') return <span key={i} className={styles.matrixEqOp}>{p.text}</span>
+            if (p.op !== undefined) return <span key={i} className={styles.matrixEqOp}>{p.op}</span>
             return (
               <div key={i} className={styles.matrixEqItem}>
                 {p.label && <p className={styles.matrixEqLabel}>{p.label}</p>}
